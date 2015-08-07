@@ -7,7 +7,7 @@
  * Copyright 2013, Aaron Klump
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Wed Apr 16 16:32:14 PDT 2014
+ * Date: Fri Aug  7 15:39:37 PDT 2015
  */
 ;(function($, undefined) {
 "use strict";
