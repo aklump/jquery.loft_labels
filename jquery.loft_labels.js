@@ -83,7 +83,7 @@ $.fn.loftLabels = function(options, instances) {
 
       unclear: function () {
         if (!this.value() && this.defaultText) {
-          this.erase();
+          this.default();
         }
       }, 
 
