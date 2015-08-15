@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+</head>
+<body>
+<h2 id="usage">Usage</h2>
+
+<p>For a given form element with a label in the following structure:</p>
+
+<pre><code>&lt;form&gt;
+  &lt;label for=&quot;search&quot;&gt;Type to search...&lt;/label&gt;
+  &lt;input type=&quot;text&quot; id=&quot;search&quot; name=&quot;search&quot; value=&quot;&quot;/&gt;
+&lt;/form&gt;
+</code></pre>
+
+<p>You would use this jQuery code to make this plugin work:</p>
+
+<pre><code>$('form').loftLabels();
+</code></pre>
+
+<p>See the plugin file for options to pass.</p>
+
+<h2 id="usagewithoutalabel">Usage without a <code>&lt;label&gt;</code></h2>
+
+<pre><code>&lt;form&gt;
+  &lt;input type=&quot;text&quot; id=&quot;search&quot; name=&quot;search&quot; value=&quot;&quot;/&gt;
+&lt;/form&gt;
+</code></pre>
+
+<p>You would use this jQuery code:</p>
+
+<pre><code>$('#search').loftLabels({
+  callback: function() {
+    return 'Type to search...'
+  }
+});
+</code></pre>
+
+<h2 id="capturetheinstanceforlatermanipulation">Capture the instance for later manipulation</h2>
+
+<pre><code>var instances = [];
+$('#search').loftLabels({
+  callback: function() {
+    return 'Type to search...'
+  }
+}, instances);
+var instance = instances[0];
+
+// instance.el
+// instance.$el
+// instance.defaultText
+// instance.settings
+
+...
+
+// Call the intializer later on if desired...
+instance.init();
+
+// Get the value of the input...
+var value = instance.value();
+
+// Clear the field if the value is the default...
+instance.clear();
+
+// Restore the field to default if empty...
+instance.unclear();
+
+// Overwrite the field with the default...
+instance.default();
+</code></pre>
+
+<h2 id="installwithbower">Install with bower</h2>
+
+<pre><code>bower install loft_labels
+</code></pre>
+
+</body>
+</html>

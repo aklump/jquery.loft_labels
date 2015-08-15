@@ -1,18 +1,19 @@
-/*!
+/**
  * Loft Labels jQuery JavaScript Plugin v0.3.2
  * http://www.intheloftstudios.com/packages/jquery/jquery.loft_labels
  *
  * jQuery plugin to move textfield labels into the input element itself as the default values.
  *
  * Copyright 2013, Aaron Klump
- * Dual licensed under the MIT or GPL Version 2 licenses.
+ * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Fri Aug  7 15:48:02 PDT 2015
+ * Date: Fri Aug 14 18:43:59 PDT 2015
  */
 ;(function($, undefined) {
 "use strict";
 
-$.fn.loftLabels = function(options) {
+$.fn.loftLabels = function(options, instances) {
+  instances     = instances || [];
   var $elements = $(this);
 
   // Do nothing when nothing selected
@@ -27,51 +28,93 @@ $.fn.loftLabels = function(options) {
   .addClass(settings.cssPrefix + '-processed');
 
   $elements.each(function () {
-
     // Setup: Move the label into the field
-    var $input = $(this);
-    var id = $input.attr('id');
-    var $label = $input.siblings('label[for=' + id + ']');
-    $label.hide();
-    var defaultText = $.trim($label.text());
-    if (settings.callback) {
-      defaultText = settings.callback(defaultText);
-    }
-    if ($input.val()) {
-      $input.addClass(settings.focus);
-      return $(this);
-    }
-    else {
-      $input.val(defaultText);
-      $input.removeClass(settings.focus);
-    }
+    var el       = this;
+    var instance = {
+      el: el,
+      $el: $(el),
+      defaultText: null,
+      settings: settings,
+
+      /**
+       * (Re-)Initialize the form element.
+       */
+      init: function() {
+        var id          = $(el).attr('id');
+        var $label      = $('label[for=' + id + ']');
+        var defaultText = '';
+        
+        // Determine the default text from the label tag...
+        if ($label.length) {
+          defaultText = $.trim($label.text());
+          $label.hide();
+        }
+
+        // Modify the default text...
+        if (settings.callback) {
+          defaultText = settings.callback(defaultText);
+        }
+
+        if ($label.length) {
+          $label.text(defaultText);
+        }
+
+        if ($(el).val()) {
+          $(el).addClass(settings.focus);
+          return $(this);
+        }
+        else {
+          $(el).val(defaultText);
+          $(el).removeClass(settings.focus);
+        }
+        this.defaultText = defaultText;
+        return this;
+      },
+
+      value: function () {
+        return $.trim($(el).val());
+      },
+
+      clear: function () {
+        if (this.value() === this.defaultText) {
+          $(el).val('');
+        }    
+      },
+
+      unclear: function () {
+        if (!this.value() && this.defaultText) {
+          this.erase();
+        }
+      }, 
+
+      default: function () {
+        $(el).val(this.defaultText);
+      }
+    };
+
+    instances.push(instance);
+    instance.init();
 
     // Handlers
-    $input
+    $(el)
     .click(function() {
-      $input.addClass(settings.focus);
-      if ($.trim($input.val()) === defaultText) {
-        $input.val('');
-      }
+      $(el).addClass(settings.focus);
+      instance.clear();
     })
     .focus(function() {
-      $input.addClass(settings.focus);
-      if ($.trim($input.val()) === defaultText) {
-        $input.val('');
-      }
+      $(el).addClass(settings.focus);
+      instance.clear();
     })
     .hover(function() {
-      $input.addClass(settings.hover);
+      $(el).addClass(settings.hover);
     }, function() {
-      $input.removeClass(settings.hover);
+      $(el).removeClass(settings.hover);
     })
     .blur(function() {
-      if (!$.trim($input.val())) {
-        $input
-        .val(defaultText)
-        .removeClass(settings.focus)
-        .removeClass(settings.hover);
-      }
+      $(el)
+      .removeClass(settings.focus)
+      .removeClass(settings.hover);
+      instance.unclear();
     });
   });
 
@@ -95,6 +138,6 @@ $.fn.loftLabels.defaults = {
   "cssPrefix" : 'loft-labels'
 };
 
-$.fn.loftLabels.version = function() { return '0.3.0'; };
+$.fn.loftLabels.version = function() { return '0.3.2'; };
 
 })(jQuery);

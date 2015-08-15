@@ -1,6 +1,6 @@
-template = false
-master = "master"
-develop = "develop"
+template = jquery
+master = "master develop"
+develop = "master develop"
 remote = origin
 create_tags = patch
 push_tags = auto
