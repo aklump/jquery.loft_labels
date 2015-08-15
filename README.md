@@ -9,7 +9,7 @@ For a given form element with a label in the following structure:
 
 You would use this jQuery code to make this plugin work:
 
-    $('form').loftLabels();
+    $('form input').loftLabels();
 
 See the plugin file for options to pass.
 
