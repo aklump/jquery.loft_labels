@@ -1,5 +1,5 @@
 /**
- * Loft Labels jQuery JavaScript Plugin v0.5.1
+ * Loft Labels jQuery JavaScript Plugin v0.5.2
  * http://www.intheloftstudios.com/packages/jquery/jquery.loft_labels
  *
  * jQuery plugin to move textfield labels into the input element itself as the default values.
@@ -7,7 +7,7 @@
  * Copyright 2013, Aaron Klump
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Fri Aug 21 15:59:40 PDT 2015
+ * Date: Tue Sep 29 15:24:54 PDT 2015
  */
 ;(function($, undefined) {
 "use strict";
@@ -22,8 +22,8 @@ $.fn.loftLabels = function(options, instances) {
   }
 
   // Create some defaults, extending them with any options that were provided
-  var settings = $.extend({}, $.fn.loftLabels.defaults, options);
-
+  var settings     = $.extend({}, $.fn.loftLabels.defaults, options);
+  
   $elements.not('.' + settings.cssPrefix + '-processed')
   .addClass(settings.cssPrefix + '-processed');
 
@@ -54,9 +54,10 @@ $.fn.loftLabels = function(options, instances) {
         if (typeof settings.callback === 'function') {
           defaultText = settings.callback(defaultText);
         }
+        this.defaultText = defaultText;
 
         if ($label.length) {
-          $label.text(defaultText);
+          $label.text(this.defaultText);
         }
 
         if ($(el).val()) {
@@ -64,10 +65,11 @@ $.fn.loftLabels = function(options, instances) {
           return $(this);
         }
         else {
-          $(el).val(defaultText);
+          this.default();
+          // $(el).val(this.defaultText);
           $(el).removeClass(settings.focus);
         }
-        this.defaultText = defaultText;
+        
 
         if (typeof settings.onInit === 'function') {
           settings.onInit(this);
@@ -82,7 +84,9 @@ $.fn.loftLabels = function(options, instances) {
 
       clear: function () {
         if (this.value() === this.defaultText) {
-          $(el).val('');
+          $(el)
+          .val('')
+          .removeClass(settings.default);
         }    
       },
 
@@ -93,7 +97,9 @@ $.fn.loftLabels = function(options, instances) {
       }, 
 
       default: function () {
-        $(el).val(this.defaultText);
+        $(el)
+        .val(this.defaultText)
+        .addClass(settings.default);
       }
     };
 
@@ -128,24 +134,28 @@ $.fn.loftLabels = function(options, instances) {
 
 $.fn.loftLabels.defaults = {
 
-  // The class to add to the text field when it's in focus.
-  "focus"     : "focus",
+  // The class to add to the textfield when it's in focus.
+  "focus"     : "loft-labels-is-focus",
 
-  // The class to add to the tf when it's being hovered.
-  "hover"     : "hover",
+  // The class to add to the textfield when it's being hovered.
+  "hover"     : "loft-labels-is-hover",
+
+  // The class to add ot the textfield when it has default text.
+  "default"   : "loft-labels-is-default",
 
   // a function that will receive the label string and return a
   // modified version of the label string. use this to alter the
   // label string before it's placed into the textfield.
   "callback"  : null,
   
-  // A prefix for all css classes.
+  // A prefix for some css classes.  This is not added to focus, hover nor
+  // default.
   "cssPrefix" : 'loft-labels',
 
   // a function to call after init has completed.
   "onInit": null
 };
 
-$.fn.loftLabels.version = function() { return '0.5.1'; };
+$.fn.loftLabels.version = function() { return '0.5.2'; };
 
 })(jQuery);

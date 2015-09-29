@@ -1,3 +1,16 @@
+QUnit.test("Test the is-default class is applied/removed.", function(assert) {
+  var $el         = $('#loft-labels-a input');
+  $el.loftLabels();
+
+  assert.ok($el.hasClass('loft-labels-is-default'));
+  
+  $el.focus().val('not the default');
+  assert.ok(!$el.hasClass('loft-labels-is-default'));
+
+  $el.val('').blur();
+  assert.ok($el.hasClass('loft-labels-is-default'));
+});
+
 QUnit.test("Test instance.clear/unclear", function(assert) {
   var $el         = $('#loft-labels-a input');
   var instances   = [];
@@ -99,16 +112,16 @@ QUnit.test("Check default classes on focus, blur and hover.", function(assert) {
 
   $el.focus();
   assert.strictEqual('', $el.val());
-  assert.strictEqual(true, $el.hasClass('focus'));
+  assert.strictEqual(true, $el.hasClass('loft-labels-is-focus'));
 
   $el.blur();
-  assert.strictEqual(false, $el.hasClass('focus')); 
+  assert.strictEqual(false, $el.hasClass('loft-labels-is-focus')); 
 
   $el.trigger('mouseenter');
-  assert.strictEqual(true, $el.hasClass('hover')); 
+  assert.strictEqual(true, $el.hasClass('loft-labels-is-hover')); 
 
   $el.trigger('mouseleave');
-  assert.strictEqual(false, $el.hasClass('hover')); 
+  assert.strictEqual(false, $el.hasClass('loft-labels-is-hover')); 
 });
 
 QUnit.test("Using custom css prefix handles label correctly.", function(assert) {
