@@ -7,155 +7,163 @@
  * Copyright 2013, Aaron Klump
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Thu Nov 19 16:19:40 PST 2015
+ * Date: Mon Feb  1 13:42:39 PST 2016
  */
-;(function($, undefined) {
-"use strict";
+;(function ($, undefined) {
+  "use strict";
 
-$.fn.loftLabels = function(options, instances) {
-  instances     = instances || [];
-  var $elements = $(this);
+  $.fn.loftLabels = function (options, instances) {
+    instances = instances || [];
+    var $elements = $(this);
 
-  // Do nothing when nothing selected
-  if ($elements.length === 0) {
-    return;
-  }
+    // Do nothing when nothing selected
+    if ($elements.length === 0) {
+      return;
+    }
 
-  // Create some defaults, extending them with any options that were provided
-  var settings     = $.extend({}, $.fn.loftLabels.defaults, options);
-  
-  $elements.not('.' + settings.cssPrefix + '-processed')
-  .addClass(settings.cssPrefix + '-processed');
+    // Create some defaults, extending them with any options that were provided
+    var settings = $.extend({}, $.fn.loftLabels.defaults, options);
 
-  $elements.each(function () {
-    // Setup: Move the label into the field
-    var el       = this;
-    var instance = {
-      el: el,
-      $el: $(el),
-      defaultText: null,
-      settings: settings,
+    $elements.not('.' + settings.cssPrefix + '-processed')
+      .addClass(settings.cssPrefix + '-processed');
 
-      /**
-       * (Re-)Initialize the form element.
-       */
-      init: function() {
-        var id          = $(el).attr('id');
-        var $label      = $('label[for=' + id + ']');
-        var defaultText = '';
-        
-        // Determine the default text from the label tag...
-        if ($label.length) {
-          defaultText = $.trim($label.text());
-          $label.hide();
-        }
+    $elements.each(function () {
+      // Setup: Move the label into the field
+      var el = this;
+      var instance = {
+        el         : el,
+        $el        : $(el),
+        defaultText: null,
+        settings   : settings,
 
-        // Modify the default text...
-        if (typeof settings.callback === 'function') {
-          defaultText = settings.callback(defaultText);
-        }
-        this.defaultText = defaultText;
+        /**
+         * (Re-)Initialize the form element.
+         */
+        init: function () {
+          var _           = this,
+              id          = _.$el.attr('id'),
+              $label      = settings.labelSelector(_.$el),
+              defaultText = '';
 
-        if ($label.length) {
-          $label.text(this.defaultText);
-        }
+          // Determine the default text from the label tag...
+          if ($label.length) {
+            defaultText = $.trim($label.text());
+            $label.hide();
+          }
 
-        if ($(el).val()) {
-          $(el).addClass(settings.focus);
-          return $(this);
-        }
-        else {
-          this.default();
-          // $(el).val(this.defaultText);
-          $(el).removeClass(settings.focus);
-        }
-        
+          // Modify the default text...
+          if (typeof settings.callback === 'function') {
+            defaultText = settings.callback(defaultText);
+          }
+          this.defaultText = defaultText;
 
-        if (typeof settings.onInit === 'function') {
-          settings.onInit(this);
-        }
+          if ($label.length) {
+            $label.text(this.defaultText);
+          }
 
-        return this;
-      },
+          if (_.$el.val()) {
+            _.$el.addClass(settings.focus);
+            return $(this);
+          }
+          else {
+            this.default();
+            // _.$el.val(this.defaultText);
+            _.$el.removeClass(settings.focus);
+          }
 
-      value: function () {
-        return $.trim($(el).val());
-      },
 
-      clear: function () {
-        if (this.value() === this.defaultText) {
+          if (typeof settings.onInit === 'function') {
+            settings.onInit(this);
+          }
+
+          return this;
+        },
+
+        value: function () {
+          return $.trim($(el).val());
+        },
+
+        clear: function () {
+          if (this.value() === this.defaultText) {
+            $(el)
+              .val('')
+              .removeClass(settings.default);
+          }
+        },
+
+        unclear: function () {
+          if (!this.value() && this.defaultText) {
+            this.default();
+          }
+        },
+
+        default: function () {
           $(el)
-          .val('')
-          .removeClass(settings.default);
-        }    
-      },
-
-      unclear: function () {
-        if (!this.value() && this.defaultText) {
-          this.default();
+            .val(this.defaultText)
+            .addClass(settings.default);
         }
-      }, 
+      };
 
-      default: function () {
-        $(el)
-        .val(this.defaultText)
-        .addClass(settings.default);
-      }
-    };
+      instances.push(instance);
+      instance.init();
 
-    instances.push(instance);
-    instance.init();
-
-    // Handlers
-    $(el)
-    .click(function() {
-      $(el).addClass(settings.focus);
-      instance.clear();
-    })
-    .focus(function() {
-      $(el).addClass(settings.focus);
-      instance.clear();
-    })
-    .hover(function() {
-      $(el).addClass(settings.hover);
-    }, function() {
-      $(el).removeClass(settings.hover);
-    })
-    .blur(function() {
+      // Handlers
       $(el)
-      .removeClass(settings.focus)
-      .removeClass(settings.hover);
-      instance.unclear();
+        .click(function () {
+          $(el).addClass(settings.focus);
+          instance.clear();
+        })
+        .focus(function () {
+          $(el).addClass(settings.focus);
+          instance.clear();
+        })
+        .hover(function () {
+          $(el).addClass(settings.hover);
+        }, function () {
+          $(el).removeClass(settings.hover);
+        })
+        .blur(function () {
+          $(el)
+            .removeClass(settings.focus)
+            .removeClass(settings.hover);
+          instance.unclear();
+        });
     });
-  });
 
-  return this;
-};
+    return this;
+  };
 
-$.fn.loftLabels.defaults = {
+  $.fn.loftLabels.defaults = {
 
-  // The class to add to the textfield when it's in focus.
-  "focus"     : "loft-labels-is-focus",
+    // The class to add to the textfield when it's in focus.
+    "focus": "loft-labels-is-focus",
 
-  // The class to add to the textfield when it's being hovered.
-  "hover"     : "loft-labels-is-hover",
+    // The class to add to the textfield when it's being hovered.
+    "hover": "loft-labels-is-hover",
 
-  // The class to add ot the textfield when it has default text.
-  "default"   : "loft-labels-is-default",
+    // The class to add ot the textfield when it has default text.
+    "default": "loft-labels-is-default",
 
-  // a function that will receive the label string and return a
-  // modified version of the label string. use this to alter the
-  // label string before it's placed into the textfield.
-  "callback"  : null,
-  
-  // A prefix for some css classes.  This is not added to focus, hover nor
-  // default.
-  "cssPrefix" : 'loft-labels',
+    // a function that will receive the label string and return a
+    // modified version of the label string. use this to alter the
+    // label string before it's placed into the textfield.
+    "callback": null,
 
-  // a function to call after init has completed.
-  "onInit": null
-};
+    // A prefix for some css classes.  This is not added to focus, hover nor
+    // default.
+    "cssPrefix": 'loft-labels',
 
-$.fn.loftLabels.version = function() { return '0.6.1'; };
+    // a function to call after init has completed.
+    "onInit": null,
+
+    // a function used to locate the label based on the input.
+    "labelSelector": function($el) {
+      return $el.siblings('label').first();
+    }
+  };
+
+  $.fn.loftLabels.version = function () {
+    return '0.6.1';
+  };
 
 })(jQuery);

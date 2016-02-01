@@ -1,9 +1,24 @@
-QUnit.test("Test the is-default class is applied/removed.", function(assert) {
-  var $el         = $('#loft-labels-a input');
+QUnit.test("Test when input has no id.", function (assert) {
+  var control = $('#loft-labels-a label').text();
+  var done = assert.async();
+  var $el = $('#loft-labels-a input');
+  $el.removeAttr('id');
+  assert.ok(!$el.attr('id'));
+
+  $el.loftLabels({
+    onInit: function () {
+      assert.strictEqual($el.val(), control);
+      done();
+    }
+  });
+});
+
+QUnit.test("Test the is-default class is applied/removed.", function (assert) {
+  var $el = $('#loft-labels-a input');
   $el.loftLabels();
 
   assert.ok($el.hasClass('loft-labels-is-default'));
-  
+
   $el.focus().val('not the default');
   assert.ok(!$el.hasClass('loft-labels-is-default'));
 
@@ -11,9 +26,9 @@ QUnit.test("Test the is-default class is applied/removed.", function(assert) {
   assert.ok($el.hasClass('loft-labels-is-default'));
 });
 
-QUnit.test("Test instance.clear/unclear", function(assert) {
-  var $el         = $('#loft-labels-a input');
-  var instances   = [];
+QUnit.test("Test instance.clear/unclear", function (assert) {
+  var $el = $('#loft-labels-a input');
+  var instances = [];
   var defaultText = 'Type to search...';
   $el.loftLabels({}, instances);
   var instance = instances[0];
@@ -25,7 +40,7 @@ QUnit.test("Test instance.clear/unclear", function(assert) {
   assert.strictEqual(defaultText, instance.$el.val());
 
   instance.$el.val('not default');
-  
+
   // Does not clear if the value is not the default.
   instance.clear();
   assert.strictEqual('not default', instance.$el.val());
@@ -38,9 +53,9 @@ QUnit.test("Test instance.clear/unclear", function(assert) {
   assert.strictEqual(defaultText, instance.$el.val());
 });
 
-QUnit.test("Test using the instance returned.", function(assert) {
-  var $el         = $('#loft-labels-a input');
-  var instances   = [];
+QUnit.test("Test using the instance returned.", function (assert) {
+  var $el = $('#loft-labels-a input');
+  var instances = [];
   var defaultText = 'Type to search...';
   $el.loftLabels({}, instances);
   assert.strictEqual(1, instances.length);
@@ -51,8 +66,8 @@ QUnit.test("Test using the instance returned.", function(assert) {
   assert.strictEqual(defaultText, instance.defaultText);
 });
 
-QUnit.test("Test the onInit callback.", function(assert) {
-  var $el      = $('#loft-labels-a input');
+QUnit.test("Test the onInit callback.", function (assert) {
+  var $el = $('#loft-labels-a input');
   var received = assert.async();
 
   $el.loftLabels({
@@ -61,11 +76,11 @@ QUnit.test("Test the onInit callback.", function(assert) {
       assertInstance(assert, instance);
       received();
     }
-  });  
+  });
 });
 
-QUnit.test("Test the default value callback.", function(assert) {
-  var $el      = $('#loft-labels-a input');
+QUnit.test("Test the default value callback.", function (assert) {
+  var $el = $('#loft-labels-a input');
   var received = assert.async();
   var complete = assert.async();
 
@@ -73,17 +88,17 @@ QUnit.test("Test the default value callback.", function(assert) {
     callback: function (defaultText) {
       assert.strictEqual('Type to search...', defaultText);
       received();
-      
+
       return "Breakfast time!";
     }
   });
-  setTimeout(function() {
+  setTimeout(function () {
     assert.strictEqual('Breakfast time!', $el.val());
-    complete(); 
+    complete();
   }, 10);
 });
 
-QUnit.test("Check custom classes on focus, blur and hover.", function(assert) {
+QUnit.test("Check custom classes on focus, blur and hover.", function (assert) {
   var $el = $('#loft-labels-a input');
 
   $el.loftLabels({
@@ -96,16 +111,16 @@ QUnit.test("Check custom classes on focus, blur and hover.", function(assert) {
   assert.strictEqual(true, $el.hasClass('highlight'));
 
   $el.blur();
-  assert.strictEqual(false, $el.hasClass('highlight')); 
+  assert.strictEqual(false, $el.hasClass('highlight'));
 
   $el.trigger('mouseenter');
-  assert.strictEqual(true, $el.hasClass('over')); 
+  assert.strictEqual(true, $el.hasClass('over'));
 
   $el.trigger('mouseleave');
-  assert.strictEqual(false, $el.hasClass('over')); 
+  assert.strictEqual(false, $el.hasClass('over'));
 });
 
-QUnit.test("Check default classes on focus, blur and hover.", function(assert) {
+QUnit.test("Check default classes on focus, blur and hover.", function (assert) {
   var $el = $('#loft-labels-a input');
 
   $el.loftLabels();
@@ -115,16 +130,16 @@ QUnit.test("Check default classes on focus, blur and hover.", function(assert) {
   assert.strictEqual(true, $el.hasClass('loft-labels-is-focus'));
 
   $el.blur();
-  assert.strictEqual(false, $el.hasClass('loft-labels-is-focus')); 
+  assert.strictEqual(false, $el.hasClass('loft-labels-is-focus'));
 
   $el.trigger('mouseenter');
-  assert.strictEqual(true, $el.hasClass('loft-labels-is-hover')); 
+  assert.strictEqual(true, $el.hasClass('loft-labels-is-hover'));
 
   $el.trigger('mouseleave');
-  assert.strictEqual(false, $el.hasClass('loft-labels-is-hover')); 
+  assert.strictEqual(false, $el.hasClass('loft-labels-is-hover'));
 });
 
-QUnit.test("Using custom css prefix handles label correctly.", function(assert) {
+QUnit.test("Using custom css prefix handles label correctly.", function (assert) {
   var $el = $('#loft-labels-a input');
 
   $el.loftLabels({cssPrefix: 'do-re-mi-'});
@@ -134,7 +149,7 @@ QUnit.test("Using custom css prefix handles label correctly.", function(assert) 
   assert.ok($el.hasClass('do-re-mi--processed'));
 });
 
-QUnit.test("Simple usage (no args) handles label correctly.", function(assert) {
+QUnit.test("Simple usage (no args) handles label correctly.", function (assert) {
   var $el = $('#loft-labels-a input');
 
   $el.loftLabels();
@@ -153,7 +168,7 @@ function assertInstance(assert, instance) {
   assert.strictEqual('function', typeof instance.value);
   assert.strictEqual('function', typeof instance.clear);
   assert.strictEqual('function', typeof instance.unclear);
-  assert.strictEqual('function', typeof instance.default);  
+  assert.strictEqual('function', typeof instance.default);
 }
 
 QUnit.testStart(function (details) {
