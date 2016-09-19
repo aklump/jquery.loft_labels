@@ -29,6 +29,21 @@ You would use this jQuery code:
 
 ## Capture the instance for later manipulation
 
+    var instance = $('#search')
+    .loftLabels({
+      callback: function () {
+        return 'Type to search...'
+      }
+    })
+    .data('loftLabels');
+    
+    // instance.el
+    // instance.$el
+    // instance.defaultText
+    // instance.settings
+    
+    --- OR THE LEGACY CODE IS...
+    
     var instances = [];
     $('#search').loftLabels({
       callback: function() {
@@ -36,11 +51,6 @@ You would use this jQuery code:
       }
     }, instances);
     var instance = instances[0];
-
-    // instance.el
-    // instance.$el
-    // instance.defaultText
-    // instance.settings
 
     ...
 
