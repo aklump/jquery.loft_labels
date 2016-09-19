@@ -1,5 +1,5 @@
 /**
- * Loft Labels jQuery JavaScript Plugin v0.6.4
+ * Loft Labels jQuery JavaScript Plugin v0.6.5
  * http://www.intheloftstudios.com/packages/jquery/jquery.loft_labels
  *
  * jQuery plugin to move textfield labels into the input element itself as the default values.
@@ -7,7 +7,7 @@
  * Copyright 2013, Aaron Klump
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Mon Sep 19 15:28:57 PDT 2016
+ * Date: Mon Sep 19 15:41:26 PDT 2016
  */
 ;(function ($, undefined) {
   "use strict";
@@ -45,7 +45,7 @@
           var _           = this,
               $label      = settings.labelSelector(_.$el),
               defaultText = '',
-              tagName = _.$el.attr('tagName').toLowerCase();
+              tagName = _.$el.get(0).tagName.toLowerCase();
 
           // Determine the default text from the label tag...
           if (tagName === 'textarea') {
