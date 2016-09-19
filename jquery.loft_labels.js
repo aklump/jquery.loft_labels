@@ -1,5 +1,5 @@
 /**
- * Loft Labels jQuery JavaScript Plugin v0.6.3
+ * Loft Labels jQuery JavaScript Plugin v0.6.4
  * http://www.intheloftstudios.com/packages/jquery/jquery.loft_labels
  *
  * jQuery plugin to move textfield labels into the input element itself as the default values.
@@ -7,7 +7,7 @@
  * Copyright 2013, Aaron Klump
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Mon Sep 19 15:26:35 PDT 2016
+ * Date: Mon Sep 19 15:28:57 PDT 2016
  */
 ;(function ($, undefined) {
   "use strict";
