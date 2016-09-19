@@ -1,5 +1,5 @@
 /**
- * Loft Labels jQuery JavaScript Plugin v0.6.2
+ * Loft Labels jQuery JavaScript Plugin v0.6.3
  * http://www.intheloftstudios.com/packages/jquery/jquery.loft_labels
  *
  * jQuery plugin to move textfield labels into the input element itself as the default values.
@@ -7,7 +7,7 @@
  * Copyright 2013, Aaron Klump
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Mon Feb  1 13:43:24 PST 2016
+ * Date: Mon Sep 19 15:26:35 PDT 2016
  */
 ;(function ($, undefined) {
   "use strict";
@@ -25,11 +25,13 @@
     var settings = $.extend({}, $.fn.loftLabels.defaults, options);
 
     $elements.not('.' + settings.cssPrefix + '-processed')
-      .addClass(settings.cssPrefix + '-processed');
+    .addClass(settings.cssPrefix + '-processed');
 
     $elements.each(function () {
       // Setup: Move the label into the field
-      var el = this;
+      var el  = this,
+          $el = $(this);
+
       var instance = {
         el         : el,
         $el        : $(el),
@@ -41,11 +43,15 @@
          */
         init: function () {
           var _           = this,
-              id          = _.$el.attr('id'),
               $label      = settings.labelSelector(_.$el),
-              defaultText = '';
+              defaultText = '',
+              tagName = _.$el.attr('tagName').toLowerCase();
 
           // Determine the default text from the label tag...
+          if (tagName === 'textarea') {
+            defaultText = _.$el.text();
+          }
+
           if ($label.length) {
             defaultText = $.trim($label.text());
             $label.hide();
@@ -67,10 +73,8 @@
           }
           else {
             this.default();
-            // _.$el.val(this.defaultText);
             _.$el.removeClass(settings.focus);
           }
-
 
           if (typeof settings.onInit === 'function') {
             settings.onInit(this);
@@ -86,8 +90,8 @@
         clear: function () {
           if (this.value() === this.defaultText) {
             $(el)
-              .val('')
-              .removeClass(settings.default);
+            .val('')
+            .removeClass(settings.default);
           }
         },
 
@@ -99,8 +103,8 @@
 
         default: function () {
           $(el)
-            .val(this.defaultText)
-            .addClass(settings.default);
+          .val(this.defaultText)
+          .addClass(settings.default);
         }
       };
 
@@ -108,26 +112,27 @@
       instance.init();
 
       // Handlers
-      $(el)
-        .click(function () {
-          $(el).addClass(settings.focus);
-          instance.clear();
-        })
-        .focus(function () {
-          $(el).addClass(settings.focus);
-          instance.clear();
-        })
-        .hover(function () {
-          $(el).addClass(settings.hover);
-        }, function () {
-          $(el).removeClass(settings.hover);
-        })
-        .blur(function () {
-          $(el)
-            .removeClass(settings.focus)
-            .removeClass(settings.hover);
-          instance.unclear();
-        });
+      $el
+      .click(function () {
+        $el.addClass(settings.focus);
+        instance.clear();
+      })
+      .focus(function () {
+        $el.addClass(settings.focus);
+        instance.clear();
+      })
+      .hover(function () {
+        $el.addClass(settings.hover);
+      }, function () {
+        $el.removeClass(settings.hover);
+      })
+      .blur(function () {
+        $el
+        .removeClass(settings.focus)
+        .removeClass(settings.hover);
+        instance.unclear();
+      })
+      .data('loftLabels', instance);
     });
 
     return this;
@@ -157,7 +162,7 @@
     "onInit": null,
 
     // a function used to locate the label based on the input.
-    "labelSelector": function($el) {
+    "labelSelector": function ($el) {
       return $el.siblings('label').first();
     }
   };

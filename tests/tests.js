@@ -1,3 +1,41 @@
+/**
+ * @file
+ * Tests provided against the LoftLabels class.
+ *
+ * @ingroup loft_labels
+ * @{
+ */
+var QUnit = QUnit || {};
+QUnit.storage = {};
+
+//
+//
+// Build your tests below here...
+//
+// QUnit.test("Test textarea with no label", function (assert) {
+//   var $el = $('#textarea_no_label');
+//   $el.loftLabels();
+// });
+
+QUnit.test("Test instance.default for textarea.", function (assert) {
+  var $el = $('#loft-labels-a textarea');
+  assert.strictEqual('Share your thoughts...', $el.loftLabels().data('loftLabels').defaultText);
+});
+
+
+QUnit.test("Test instance.default for textfield.", function (assert) {
+  var $el = $('#loft-labels-a input');
+  assert.strictEqual('Type to search...', $el.loftLabels().data('loftLabels').defaultText);
+});
+
+
+QUnit.test("Test the instance is available at the $el.data('loftLabels')", function (assert) {
+  var $el = $('#loft-labels-a input');
+  $el.loftLabels();
+  assert.ok($el.data('loftLabels'));
+});
+
+
 QUnit.test("Test when input has no id.", function (assert) {
   var control = $('#loft-labels-a label').text();
   var done = assert.async();
@@ -26,7 +64,33 @@ QUnit.test("Test the is-default class is applied/removed.", function (assert) {
   assert.ok($el.hasClass('loft-labels-is-default'));
 });
 
-QUnit.test("Test instance.clear/unclear", function (assert) {
+QUnit.test("Test instance.clear/unclear for textarea.", function (assert) {
+  var $el = $('#loft-labels-a textarea'),
+      defaultText = 'Share your thoughts...';
+  $el.loftLabels();
+  var instance = $el.data('loftLabels');
+
+  instance.clear();
+  assert.strictEqual('', instance.$el.val());
+
+  instance.unclear();
+  assert.strictEqual(defaultText, instance.$el.val());
+
+  instance.$el.val('not default');
+
+  // Does not clear if the value is not the default.
+  instance.clear();
+  assert.strictEqual('not default', instance.$el.val());
+
+  instance.unclear();
+  assert.strictEqual('not default', instance.$el.val());
+
+  // Goes back to default regardless of the value,.
+  instance.default();
+  assert.strictEqual(defaultText, instance.$el.val());
+});
+
+QUnit.test("Test instance.clear/unclear for textfield.", function (assert) {
   var $el = $('#loft-labels-a input');
   var instances = [];
   var defaultText = 'Type to search...';
@@ -144,7 +208,7 @@ QUnit.test("Using custom css prefix handles label correctly.", function (assert)
 
   $el.loftLabels({cssPrefix: 'do-re-mi-'});
 
-  assert.ok($('#loft-labels-a>label').is(':hidden'));
+  assert.ok($('#loft-labels-a label').is(':hidden'));
   assert.strictEqual('Type to search...', $el.val());
   assert.ok($el.hasClass('do-re-mi--processed'));
 });
@@ -154,7 +218,7 @@ QUnit.test("Simple usage (no args) handles label correctly.", function (assert) 
 
   $el.loftLabels();
 
-  assert.ok($('#loft-labels-a>label').is(':hidden'));
+  assert.ok($('#loft-labels-a label').is(':hidden'));
   assert.strictEqual('Type to search...', $el.val());
   assert.ok($el.hasClass('loft-labels-processed'));
 });
@@ -171,14 +235,30 @@ function assertInstance(assert, instance) {
   assert.strictEqual('function', typeof instance.default);
 }
 
+
+//
+//
+// Per test setup
+//
 QUnit.testStart(function (details) {
-
-  // Updates with fresh markup for each test.
-  var setup = $('<form id="loft-labels-a"><label for="search">Type to search...</label><input type="text" id="search" name="search" value=""/></form>');
-
-  $('#testing-markup').html(setup);
+  // Create a new DOM element #test, cloned from #template.
+  $('#test').replaceWith(QUnit.storage.$template.clone().attr('id', 'test'));
 });
 
+QUnit.testDone(function () {
+
+  // Reset the html classes per the default.
+  $('html').attr('class', QUnit.storage.htmlClass);
+});
+
+// Callback fires before all tests.
+QUnit.begin(function () {
+  QUnit.storage.htmlClass = $('html').attr('class') || '';
+  QUnit.storage.$template = $('#template').clone();
+  $('#template').replaceWith(QUnit.storage.$template.clone().attr('id', 'test'));
+});
+
+// Callback fires after all tests.
 QUnit.done(function () {
-  $('#testing-markup').html('');
+  $('#test').replaceWith(QUnit.storage.$template);
 });
