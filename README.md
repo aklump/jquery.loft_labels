@@ -27,6 +27,20 @@ You would use this jQuery code:
       }
     });
 
+## Simple form validation
+
+We can enable/disable the submit button based on the default value of the input using the callbacks: `onDefault` and `onNotDefault`.
+
+    var $submit = $('#form1 submit')
+    $('#form1 input').loftLabels({
+      onDefault   : function () {
+        $submit.attr('disabled', 'disabled');
+      },
+      onNotDefault: function () {
+        $submit.attr('disabled', '');
+      }
+    });
+
 ## Capture the instance for later manipulation
 
     var instance = $('#search')
