@@ -1,5 +1,5 @@
 /**
- * Loft Labels jQuery JavaScript Plugin v0.6.5
+ * Loft Labels jQuery JavaScript Plugin v0.7
  * http://www.intheloftstudios.com/packages/jquery/jquery.loft_labels
  *
  * jQuery plugin to move textfield labels into the input element itself as the default values.
@@ -7,9 +7,9 @@
  * Copyright 2013, Aaron Klump
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Mon Sep 19 15:41:26 PDT 2016
+ * Date: Sat Dec 31 08:10:22 PST 2016
  */
-;(function ($, undefined) {
+;(function ($) {
   "use strict";
 
   $.fn.loftLabels = function (options, instances) {
@@ -45,7 +45,7 @@
           var _           = this,
               $label      = settings.labelSelector(_.$el),
               defaultText = '',
-              tagName = _.$el.get(0).tagName.toLowerCase();
+              tagName     = _.$el.get(0).tagName.toLowerCase();
 
           // Determine the default text from the label tag...
           if (tagName === 'textarea') {
@@ -92,6 +92,9 @@
             $(el)
             .val('')
             .removeClass(settings.default);
+            if (typeof settings.onNotDefault === 'function') {
+              settings.onNotDefault();
+            }
           }
         },
 
@@ -105,6 +108,9 @@
           $(el)
           .val(this.defaultText)
           .addClass(settings.default);
+          if (typeof settings.onDefault === 'function') {
+            settings.onDefault();
+          }
         }
       };
 
@@ -141,28 +147,34 @@
   $.fn.loftLabels.defaults = {
 
     // The class to add to the textfield when it's in focus.
-    "focus": "loft-labels-is-focus",
+    focus: "loft-labels-is-focus",
 
     // The class to add to the textfield when it's being hovered.
-    "hover": "loft-labels-is-hover",
+    hover: "loft-labels-is-hover",
 
     // The class to add ot the textfield when it has default text.
-    "default": "loft-labels-is-default",
+    default: "loft-labels-is-default",
 
     // a function that will receive the label string and return a
     // modified version of the label string. use this to alter the
     // label string before it's placed into the textfield.
-    "callback": null,
+    callback: null,
 
     // A prefix for some css classes.  This is not added to focus, hover nor
     // default.
-    "cssPrefix": 'loft-labels',
+    cssPrefix: 'loft-labels',
 
     // a function to call after init has completed.
-    "onInit": null,
+    onInit: null,
+
+    // a function to call when the value becomes the default
+    onDefault: null,
+
+    // a function to call when the value becomes something other than the default
+    onNotDefault: null,
 
     // a function used to locate the label based on the input.
-    "labelSelector": function ($el) {
+    labelSelector: function ($el) {
       return $el.siblings('label').first();
     }
   };
