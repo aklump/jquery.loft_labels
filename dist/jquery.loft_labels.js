@@ -7,7 +7,7 @@
  * Copyright 2013-2017, 
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Sun Jan  1 13:03:52 PST 2017
+ * Date: Sun Jan  1 13:08:13 PST 2017
  */
 ;(function ($) {
   "use strict";
