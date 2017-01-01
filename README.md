@@ -27,24 +27,26 @@ You would use this jQuery code:
       }
     });
 
-## Simple form validation
+## Form validation
+In many cases, you would not want to submit a form that has the default value of the input as it's value.  You can leverage the `onChange` callback for a client-side form validation function, like the following example illustrates.  Simply monitor the value of the input and disable/enable the submit button as appropriate.
 
-We can enable/disable the submit button based on the default value of the input using the callbacks: `onDefault` and `onNotDefault`.
-
-    var $submit = $('#form1 submit')
+    var $submit = $('#form1 submit');
     $('#form1 input').loftLabels({
-      onDefault   : function () {
-        $submit.attr('disabled', 'disabled');
+      onChange: function (value, isDefault, instances) {
+        if (!value || isDefault) {
+          $submit.attr('disabled', 'disabled');
+        }
+        else {
+          $submit.attr('disabled', '');
+        }
       },
-      onNotDefault: function () {
-        $submit.attr('disabled', '');
-      }
     });
+
+For forms that use more than on input you can review the `instances` and validate the submit key based on all instance values.  Take a look at `demo/index.html` for an example of this.
 
 ## Capture the instance for later manipulation
 
-    var instance = $('#search')
-    .loftLabels({
+    var instance = $('#search').loftLabels({
       callback: function () {
         return 'Type to search...'
       }
@@ -55,18 +57,6 @@ We can enable/disable the submit button based on the default value of the input 
     // instance.$el
     // instance.defaultText
     // instance.settings
-    
-    --- OR THE LEGACY CODE IS...
-    
-    var instances = [];
-    $('#search').loftLabels({
-      callback: function() {
-        return 'Type to search...'
-      }
-    }, instances);
-    var instance = instances[0];
-
-    ...
 
     // Call the intializer later on if desired...
     instance.init();

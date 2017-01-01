@@ -1,5 +1,5 @@
 /**
- * Loft Labels jQuery JavaScript Plugin v0.6.5
+ * Loft Labels jQuery JavaScript Plugin v0.7.1
  * http://www.intheloftstudios.com/packages/jquery/jquery.loft_labels
  *
  * jQuery plugin to move textfield labels into the input element itself as the default values.
@@ -7,14 +7,33 @@
  * Copyright 2013, Aaron Klump
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Sat Dec 31 07:49:19 PST 2016
+ * Date: Sun Jan  1 12:45:24 PST 2017
  */
 ;(function ($) {
   "use strict";
 
-  $.fn.loftLabels = function (options, instances) {
-    instances = instances || [];
-    var $elements = $(this);
+  /**
+   * Store all instances on the current page in a global var.
+   * @type {Array}
+   */
+  $.loftLabels = {
+    instances: []
+  };
+
+  $.fn.loftLabels = function (options) {
+    var plugin    = this,
+        $elements = $(this);
+
+    /**
+     * Call settings.onChange with necessary arguments.
+     *
+     * @param instance
+     * @param value
+     * @param isDefault
+     */
+    var updateHandler = function (instance, value, isDefault) {
+      settings.onChange.call(instance, value, isDefault, $.loftLabels.instances[settings.groupId]);
+    };
 
     // Do nothing when nothing selected
     if ($elements.length === 0) {
@@ -24,32 +43,33 @@
     // Create some defaults, extending them with any options that were provided
     var settings = $.extend({}, $.fn.loftLabels.defaults, options);
 
-    $elements.not('.' + settings.cssPrefix + '-processed')
-    .addClass(settings.cssPrefix + '-processed');
+    $.loftLabels.instances[settings.groupId] = $.loftLabels.instances[settings.groupId] || [];
 
-    $elements.each(function () {
+    $elements.not('.' + settings.cssPrefix + '-processed')
+    .addClass(settings.cssPrefix + '-processed')
+    .each(function () {
       // Setup: Move the label into the field
       var el  = this,
           $el = $(this);
 
       var instance = {
         el         : el,
-        $el        : $(el),
+        $el        : $el,
         defaultText: null,
         settings   : settings,
+        states     : [],
 
         /**
          * (Re-)Initialize the form element.
          */
         init: function () {
-          var _           = this,
-              $label      = settings.labelSelector(_.$el),
+          var $label      = settings.labelSelector.call(this, this.$el),
               defaultText = '',
-              tagName     = _.$el.get(0).tagName.toLowerCase();
+              tagName     = this.$el.get(0).tagName.toLowerCase();
 
           // Determine the default text from the label tag...
           if (tagName === 'textarea') {
-            defaultText = _.$el.text();
+            defaultText = this.$el.text();
           }
 
           if ($label.length) {
@@ -58,92 +78,136 @@
           }
 
           // Modify the default text...
-          if (typeof settings.callback === 'function') {
-            defaultText = settings.callback(defaultText);
-          }
+          defaultText = settings.callback.call(this, defaultText);
           this.defaultText = defaultText;
 
           if ($label.length) {
             $label.text(this.defaultText);
           }
 
-          if (_.$el.val()) {
-            _.$el.addClass(settings.focus);
+          // If we have a value in the form, this plugin is moot.
+          if (this.value()) {
+            this.$el.addClass(settings.focus);
             return $(this);
           }
           else {
             this.default();
-            _.$el.removeClass(settings.focus);
+            this.$el.removeClass(settings.focus);
           }
 
-          if (typeof settings.onInit === 'function') {
-            settings.onInit(this);
-          }
+          this.render();
+          settings.onInit(this);
 
           return this;
         },
 
+        /**
+         * Get the current value.
+         */
         value: function () {
-          return $.trim($(el).val());
+          return $.trim($el.val());
         },
 
+        /**
+         * Determine if the current value is the default value.
+         * @returns {boolean}
+         */
+        isDefault: function () {
+          return this.value() === this.defaultText;
+        },
+
+        /**
+         * Clear the value of the input, only if it is the default value.
+         */
         clear: function () {
-          if (this.value() === this.defaultText) {
-            $(el)
-            .val('')
-            .removeClass(settings.default);
-            if (typeof settings.onNotDefault === 'function') {
-              settings.onNotDefault();
-            }
+          if (this.isDefault()) {
+            $el.val('');
+            this.render();
+            updateHandler(this, '', false);
           }
         },
 
         unclear: function () {
-          if (!this.value() && this.defaultText) {
-            this.default();
-          }
+          if (!this.value() && this.defaultText) this.default();
         },
 
+        /**
+         * Set the value of the input to the default, overwriting current value.
+         */
         default: function () {
-          $(el)
-          .val(this.defaultText)
-          .addClass(settings.default);
-          if (typeof settings.onDefault === 'function') {
-            settings.onDefault();
+          $el.val(this.defaultText);
+          this.render();
+          updateHandler(this, this.defaultText, true);
+        },
+
+
+        /**
+         * Update DOM with correct CSS classes.
+         */
+        render: function () {
+          var add    = [],
+              remove = [];
+
+          // Hover
+          if (this.states.hover) {
+            add.push(settings.hover);
           }
+          else {
+            remove.push(settings.hover);
+          }
+
+          // Focus
+          if (this.states.focus) {
+            add.push(settings.focus);
+          }
+          else {
+            remove.push(settings.focus);
+          }
+
+          // Default
+          if (this.isDefault()) {
+            add.push(settings.default);
+          }
+          else {
+            remove.push(settings.default);
+          }
+
+          // Now process the DOM.
+          if (add) this.$el.addClass(add.join(' '));
+          if (remove) this.$el.removeClass(remove.join(' '));
         }
       };
 
-      instances.push(instance);
+      // This must come before init()!
+      $.loftLabels.instances[settings.groupId].push(instance);
       instance.init();
 
       // Handlers
       $el
-      .click(function () {
-        $el.addClass(settings.focus);
+      .bind('focus', function () {
+        instance.states.focus = true;
         instance.clear();
-      })
-      .focus(function () {
-        $el.addClass(settings.focus);
-        instance.clear();
-      })
-      .hover(function () {
-        $el.addClass(settings.hover);
-      }, function () {
-        $el.removeClass(settings.hover);
       })
       .blur(function () {
-        $el
-        .removeClass(settings.focus)
-        .removeClass(settings.hover);
+        instance.states.focus = false;
         instance.unclear();
+      })
+      .hover(function () {
+        instance.states.hover = true;
+        instance.render();
+      }, function () {
+        instance.states.hover = false;
+        instance.render();
+      })
+      .keyup(function () {
+        instance.render();
+        updateHandler(instance, instance.value(), instance.isDefault());
       })
       .data('loftLabels', instance);
     });
 
     return this;
   };
-
   $.fn.loftLabels.defaults = {
 
     // The class to add to the textfield when it's in focus.
@@ -155,25 +219,60 @@
     // The class to add ot the textfield when it has default text.
     default: "loft-labels-is-default",
 
-    // a function that will receive the label string and return a
-    // modified version of the label string. use this to alter the
-    // label string before it's placed into the textfield.
-    callback: null,
-
     // A prefix for some css classes.  This is not added to focus, hover nor
     // default.
     cssPrefix: 'loft-labels',
 
-    // a function to call after init has completed.
-    onInit: null,
+    /**
+     * You may group instances by groupId to affect the value of instances in the callbacks.  You would use this to
+     * group by form, for example.
+     */
+    groupId: 'global',
 
-    // a function to call when the value becomes the default
-    onDefault: null,
+    /**
+     * Modify the label string.
+     *
+     * Used this to alter the label string before it's placed into the textfield.
+     * The instance is available as 'this'.
+     *
+     * @param defaultText
+     * @returns {*}
+     */
+    callback: function (defaultText) {
+      return defaultText;
+    },
 
-    // a function to call when the value becomes something other than the default
-    onNotDefault: null,
+    /**
+     * A function to call after init has completed.
+     *
+     * $.fn.loftLabels is available as 'this'.
+     *
+     * @param instance
+     */
+    onInit: function (instance) {
+    },
 
-    // a function used to locate the label based on the input.
+    /**
+     * React to the changing value of the the input.
+     *
+     * The instance is available as 'this'.
+     *
+     * @param mixed value The current value of the input.
+     * @param bool isDefault If the current value is the default value.
+     * @param array groupInstances All instances with the same groupId will be passed here.  Can be used for validating
+     *   entire forms.
+     */
+    onChange: function (value, isDefault, groupInstances) {
+
+    },
+
+    /**
+     * Locate the label element.
+     *
+     * The instance is available as 'this'.
+     *
+     * @param $el
+     */
     labelSelector: function ($el) {
       return $el.siblings('label').first();
     }

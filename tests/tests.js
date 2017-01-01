@@ -12,10 +12,78 @@ QUnit.storage = {};
 //
 // Build your tests below here...
 //
-// QUnit.test("Test textarea with no label", function (assert) {
-//   var $el = $('#textarea_no_label');
-//   $el.loftLabels();
-// });
+
+QUnit.test("Test the onChange callback keyup().", function (assert) {
+  var $el      = $('#loft-labels-a input'),
+      received = assert.async(),
+      ready    = false;
+
+  $el.loftLabels({
+    onChange: function (value, isDefault, instances) {
+      if (ready) {
+        assert.strictEqual(isDefault, false);
+        assert.strictEqual(value, 'do re mi');
+        assertInstance(assert, instances[0]);
+        received();
+      }
+    }
+  });
+
+  ready = true;
+  $el.val('do re mi');
+  $el.keyup();
+});
+
+QUnit.test("Test the onChange callback focus().", function (assert) {
+  var $el      = $('#loft-labels-a input'),
+      received = assert.async(),
+      ready    = false;
+
+  $el.loftLabels({
+    onChange: function (value, isDefault, instances) {
+      if (ready) {
+        assert.strictEqual(isDefault, false);
+        assert.strictEqual(value, '');
+        assertInstance(assert, instances[0]);
+        received();
+      }
+    }
+  });
+
+  ready = true;
+  $el.focus();
+});
+
+QUnit.test("Test the onChange callback onInit.", function (assert) {
+  var $el      = $('#loft-labels-a input'),
+      received = assert.async();
+
+  $el.loftLabels({
+    onChange: function (value, isDefault, instances) {
+      assert.strictEqual(isDefault, true);
+      assert.strictEqual(value, 'Type to search...');
+      assertInstance(assert, instances[0]);
+      received();
+    }
+  });
+});
+
+QUnit.test("Assert groupId works", function (assert) {
+  assert.strictEqual(typeof $.loftLabels.instances.pizza, 'undefined');
+  var instance = $('#loft-labels-a input').loftLabels({
+    groupId: 'pizza',
+  }).data('loftLabels');
+  assert.strictEqual($.loftLabels.instances.pizza.length, 1);
+  assert.strictEqual($.loftLabels.instances.pizza[0], instance);
+
+  // A second groupId
+  assert.strictEqual(typeof $.loftLabels.instances.pancakes, 'undefined');
+  var instance = $('#tags').loftLabels({
+    groupId: 'pancakes',
+  }).data('loftLabels');
+  assert.strictEqual($.loftLabels.instances.pancakes.length, 1);
+  assert.strictEqual($.loftLabels.instances.pancakes[0], instance);
+});
 
 QUnit.test("Test instance.default for textarea.", function (assert) {
   var $el = $('#loft-labels-a textarea');
@@ -65,7 +133,7 @@ QUnit.test("Test the is-default class is applied/removed.", function (assert) {
 });
 
 QUnit.test("Test instance.clear/unclear for textarea.", function (assert) {
-  var $el = $('#loft-labels-a textarea'),
+  var $el         = $('#loft-labels-a textarea'),
       defaultText = 'Share your thoughts...';
   $el.loftLabels();
   var instance = $el.data('loftLabels');
@@ -91,11 +159,9 @@ QUnit.test("Test instance.clear/unclear for textarea.", function (assert) {
 });
 
 QUnit.test("Test instance.clear/unclear for textfield.", function (assert) {
-  var $el = $('#loft-labels-a input');
-  var instances = [];
-  var defaultText = 'Type to search...';
-  $el.loftLabels({}, instances);
-  var instance = instances[0];
+  var $el         = $('#loft-labels-a input'),
+      defaultText = 'Type to search...',
+      instance    = $el.loftLabels({}).data('loftLabels');
 
   instance.clear();
   assert.strictEqual('', instance.$el.val());
@@ -117,13 +183,12 @@ QUnit.test("Test instance.clear/unclear for textfield.", function (assert) {
   assert.strictEqual(defaultText, instance.$el.val());
 });
 
-QUnit.test("Test using the instance returned.", function (assert) {
-  var $el = $('#loft-labels-a input');
-  var instances = [];
-  var defaultText = 'Type to search...';
-  $el.loftLabels({}, instances);
-  assert.strictEqual(1, instances.length);
-  var instance = instances[0];
+QUnit.test("Test obtain instance from data.", function (assert) {
+  var $el         = $('#loft-labels-a input'),
+      defaultText = 'Type to search...',
+      instance    = $el.loftLabels({}).data('loftLabels');
+
+  assert.strictEqual(1, $.loftLabels.instances.global.length);
   assertInstance(assert, instance);
   assert.strictEqual(defaultText, instance.$el.val());
   assert.strictEqual(defaultText, $(instance.el).val());
@@ -228,11 +293,14 @@ function assertInstance(assert, instance) {
   assert.strictEqual('object', typeof instance.el);
   assert.strictEqual('object', typeof instance.$el);
   assert.strictEqual('object', typeof instance.settings);
-  assert.strictEqual('function', typeof instance.init);
-  assert.strictEqual('function', typeof instance.value);
+  assert.strictEqual('object', typeof instance.states);
   assert.strictEqual('function', typeof instance.clear);
-  assert.strictEqual('function', typeof instance.unclear);
   assert.strictEqual('function', typeof instance.default);
+  assert.strictEqual('function', typeof instance.init);
+  assert.strictEqual('function', typeof instance.isDefault);
+  assert.strictEqual('function', typeof instance.render);
+  assert.strictEqual('function', typeof instance.unclear);
+  assert.strictEqual('function', typeof instance.value);
 }
 
 
@@ -243,6 +311,7 @@ function assertInstance(assert, instance) {
 QUnit.testStart(function (details) {
   // Create a new DOM element #test, cloned from #template.
   $('#test').replaceWith(QUnit.storage.$template.clone().attr('id', 'test'));
+  $.loftLabels.instances = [];
 });
 
 QUnit.testDone(function () {
