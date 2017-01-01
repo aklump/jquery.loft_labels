@@ -88,7 +88,7 @@
 
       $('form.search').find('input').loftLabels({
         groupId : 'search',
-        onUpdate: function (value, isDefault, instances) {
+        onChange: function (value, isDefault, instances) {
           var $button = $('form.search button');
           // instances will only include one element because we've set this up with a groupId === 'search'; by default the groupId is 'global'.
           if (!value || isDefault) {
@@ -101,7 +101,7 @@
       });
 
       $('form.yes').find('input, textarea').loftLabels({
-          onUpdate: function (value, isDefault, instances) {
+          onChange: function (value, isDefault, instances) {
             var $button  = $('form.yes button'),
                 allValid = true;
             for (var i in instances) {
