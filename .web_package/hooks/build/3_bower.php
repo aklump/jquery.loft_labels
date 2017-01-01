@@ -10,6 +10,7 @@ try {
   }
 
   // Replace bower components.
+  // note: name has to be snake case.
   $data              = json_decode(file_get_contents($bower));
   $data->name        = $argv[3];
   $data->version     = $argv[2];

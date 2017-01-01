@@ -1,22 +1,9 @@
 {
-    "authors": [
-        "Aaron Klump <sourcecode@intheloftstudios.com>"
-    ],
-    "description": "jQuery plugin to move textfield labels into the input element itself as the default values.",
-    "homepage": "http://www.intheloftstudios.com/packages/jquery/jquery.loft_labels",
-    "ignore": [
-        ".web_package",
-        "web_package.info",
-        ".gitignore"
-    ],
-    "keywords": [
-        "form",
-        "textfield",
-        "labels",
-        "jquery"
-    ],
-    "license": "BSD",
-    "main": "jquery.loft_labels.min.js",
     "name": "Loft Labels",
-    "version": "0.7.1"
+    "version": "0.7.2",
+    "homepage": "http://www.intheloftstudios.com/packages/jquery/jquery.loft_labels",
+    "authors": [
+        ""
+    ],
+    "description": "jQuery plugin to move textfield labels into the input element itself as the default values."
 }
