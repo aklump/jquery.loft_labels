@@ -7,7 +7,7 @@
  * Copyright 2013-2017, Aaron Klump <sourcecode@intheloftstudios.com>
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Sun Jan  1 13:01:15 PST 2017
+ * Date: Sun Jan  1 13:06:25 PST 2017
  */
 ;(function ($) {
   "use strict";
