@@ -86,36 +86,28 @@
   (function ($) {
     $('document').ready(function () {
 
+      var $button = $('form.search button');
       $('form.search').find('input').loftLabels({
-        groupId : 'search',
-        onChange: function (value, isDefault, instances) {
-          var $button = $('form.search button');
-          // instances will only include one element because we've set this up with a groupId === 'search'; by default the groupId is 'global'.
-          if (!value || isDefault) {
-            $button.hide();
-          }
-          else {
-            $button.show();
-          }
+        validationGroup : 'search',
+        onValid: function(event) {
+          console.log(event);
+          $button.show();
+        },
+        onNotValid: function(event) {
+          console.log(event);
+          $button.hide();
         }
       });
 
+      var $button2  = $('form.yes button');
       $('form.yes').find('input, textarea').loftLabels({
-          onChange: function (value, isDefault, instances) {
-            var $button  = $('form.yes button'),
-                allValid = true;
-            for (var i in instances) {
-              if (!instances[i].value() || instances[i].isDefault()) {
-                allValid = false;
-                break;
-              }
-            }
-            if (!allValid) {
-              $button.html('Abort, abort!');
-            } else {
-              $button.html('Houston, we are go!');
-            }
-          }
+          validationGroup: 'form.yes',
+          onValid: function(){
+            $button2.html('Houston, we are go!');
+          },
+          onNotValid: function(){
+            $button2.html('Abort, abort!');
+          },
         }
       );
     });

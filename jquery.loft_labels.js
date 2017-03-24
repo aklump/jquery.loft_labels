@@ -4,10 +4,10 @@
  *
  * jQuery plugin to move textfield labels into the input element itself as the default values.
  *
- * Copyright 2013-2017, 
+ * Copyright 2013-2017,
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Sun Jan  1 13:08:13 PST 2017
+ * Date: Thu Mar 23 17:13:06 PDT 2017
  */
 ;(function ($) {
   "use strict";
@@ -24,14 +24,26 @@
     var $elements = $(this);
 
     /**
-     * Call settings.onChange with necessary arguments.
-     *
-     * @param instance
-     * @param value
-     * @param isDefault
+     * Fire validation callbacks after examining the values of all group instances.
      */
-    var changeHandler = function (instance, value, isDefault) {
-      settings.onChange.call(instance, value, isDefault, $.loftLabels.instances[settings.groupId]);
+    var validationHandler = function (instance, event) {
+      var settings = instance.settings;
+      if (settings.validationGroup) {
+        var groupInstances = $.loftLabels.instances[settings.validationGroup],
+            allValid       = true;
+        for (var i in groupInstances) {
+          if (!groupInstances[i].value() || groupInstances[i].isDefault()) {
+            allValid = false;
+            break;
+          }
+        }
+        if (allValid) {
+          settings.onValid.call(instance, event, groupInstances);
+        }
+        else {
+          settings.onNotValid.call(instance, event, groupInstances);
+        }
+      }
     };
 
     // Do nothing when nothing selected
@@ -40,9 +52,10 @@
     }
 
     // Create some defaults, extending them with any options that were provided
-    var settings = $.extend({}, $.fn.loftLabels.defaults, options);
+    var settings = $.extend({}, $.fn.loftLabels.defaults, options),
+        groupId  = settings.validationGroup || 'global';
 
-    $.loftLabels.instances[settings.groupId] = $.loftLabels.instances[settings.groupId] || [];
+    $.loftLabels.instances[groupId] = $.loftLabels.instances[groupId] || [];
 
     $elements.not('.' + settings.cssPrefix + '-processed')
     .addClass(settings.cssPrefix + '-processed')
@@ -95,6 +108,7 @@
           }
 
           this.render();
+          validationHandler(this, {type: 'init'});
           settings.onInit(this);
 
           return this;
@@ -122,7 +136,6 @@
           if (this.isDefault()) {
             $el.val('');
             this.render();
-            changeHandler(this, '', false);
           }
         },
 
@@ -136,9 +149,10 @@
          * Set the value of the input to the default, overwriting current value.
          */
         default: function () {
-          $el.val(this.defaultText);
-          this.render();
-          changeHandler(this, this.defaultText, true);
+          if ($el.val() !== this.defaultText) {
+            $el.val(this.defaultText);
+            this.render();
+          }
         },
 
 
@@ -184,7 +198,7 @@
       };
 
       // This must come before init()!
-      $.loftLabels.instances[settings.groupId].push(instance);
+      $.loftLabels.instances[groupId].push(instance);
       instance.init();
 
       // Handlers
@@ -193,7 +207,7 @@
         instance.states.focus = true;
         instance.clear();
       })
-      .blur(function () {
+      .bind('blur', function () {
         instance.states.focus = false;
         instance.unclear();
       })
@@ -204,9 +218,11 @@
         instance.states.hover = false;
         instance.render();
       })
-      .keyup(function () {
+      .bind('keyup paste', function () {
         instance.render();
-        changeHandler(instance, instance.value(), instance.isDefault());
+      })
+      .bind(instance.settings.validationEvents, function (event) {
+        validationHandler(instance, event);
       })
       .data('loftLabels', instance);
     });
@@ -227,12 +243,6 @@
     // A prefix for some css classes.  This is not added to focus, hover nor
     // default.
     cssPrefix: 'loft-labels',
-
-    /**
-     * You may group instances by groupId to affect the value of instances in the callbacks.  You would use this to
-     * group by form, for example.
-     */
-    groupId: 'global',
 
     /**
      * Modify the label string.
@@ -258,17 +268,37 @@
     },
 
     /**
-     * React to the changing value of the the input.
-     *
-     * The instance is available as 'this'.
-     *
-     * @param mixed value The current value of the input.
-     * @param bool isDefault If the current value is the default value.
-     * @param array groupInstances All instances with the same groupId will be passed here.  Can be used for validating
-     *   entire forms.
+     * To turn on validation, you need to set a validationGroup.  All instances of the same group will be used for
+     * validation.  This would mostly likely be all or some inputs of a single form.  You can use the id of a form, for
+     * example.
      */
-    onChange: function (value, isDefault, groupInstances) {
+    validationGroup: null,
 
+    /**
+     * These events on a given instance will trigger validation, if validationGroup is set. e.g. blur paste keyup
+     */
+    validationEvents: 'blur paste keyup',
+
+    /**
+     * Callback for when all group instances have valid values (not '' nor default)
+     *
+     * @param groupInstances
+     *
+     * @see validationEvents
+     * @see validationGroup
+     */
+    onValid: function (groupInstances) {
+    },
+
+    /**
+     * Callback for when all group instances have valid values (not '' nor default)
+     *
+     * @param groupInstances
+     *
+     * @see validationEvents
+     * @see validationGroup
+     */
+    onNotValid: function (groupInstances) {
     },
 
     /**
