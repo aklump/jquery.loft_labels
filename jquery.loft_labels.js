@@ -7,7 +7,7 @@
  * Copyright 2013-2017,
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Tue Apr  4 11:53:18 PDT 2017
+ * Date: Tue Apr  4 12:12:52 PDT 2017
  */
 /**
  * Example for responsive support:
@@ -16,6 +16,20 @@
  *     breakpointX          : new BreakpointX({mobile: 0, desktop: 768}),
  *     breakpointDefaultText: function (alias, bp) {
  *       return alias === 'mobile' ? 'Name' : 'Enter your first name';
+ *     }
+ *   });
+ * @endcode
+ *
+ * Example for validation
+ * @code
+ *   var $submit = $('.form-submit'),
+ *       id      = $('form').attr('id');
+ *   $('#name').loftLabels({
+ *     validationGroup: id,
+ *     onValid        : function () {
+ *       if (this.$el.val() === 'Aaron') {
+ *         $submit.click();
+ *       }
  *     }
  *   });
  * @endcode
@@ -312,7 +326,7 @@
     onValid: null,
 
     /**
-     * Callback for when all group instances have valid values (not '' nor default)
+     * Callback for when all group instances have invalid values.
      *
      * @param groupInstances
      *
