@@ -87,7 +87,8 @@
     .each(function () {
       // Setup: Move the label into the field
       var el  = this,
-          $el = $(this);
+          $el = $(this),
+          validationTimeout;
 
       var instance = {
         el         : el,
@@ -261,7 +262,10 @@
         instance.render();
       })
       .bind(instance.settings.validationEvents, function (event) {
-        validationHandler(instance, event);
+        clearTimeout(validationTimeout);
+        validationTimeout = setTimeout(function () {
+          validationHandler(instance, event);
+        }, settings.validationThrottle);
       })
       .data('loftLabels', instance);
     });
@@ -314,6 +318,12 @@
      * These events on a given instance will trigger validation, if validationGroup is set. e.g. blur paste keyup
      */
     validationEvents: 'blur paste keyup',
+
+    /**
+     * Delay in milliseconds between event and validation.  This is helpful when the input is coming from a robotyper
+     * to give the input time to fill up with the automatic typing.
+     */
+    validationThrottle: 100,
 
     /**
      * Callback for when all group instances have valid values (not '' nor default)
