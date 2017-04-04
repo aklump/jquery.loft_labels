@@ -7,7 +7,18 @@
  * Copyright 2013-2017,
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Thu Mar 23 17:14:51 PDT 2017
+ * Date: Tue Apr  4 11:30:51 PDT 2017
+ */
+/**
+ * Example for responsive support:
+ * @code
+ *   $('#name').loftLabels({
+ *     breakpointX          : new BreakpointX({mobile: 0, desktop: 768}),
+ *     breakpointDefaultText: function (alias, bp) {
+ *       return alias === 'mobile' ? 'Name' : 'Enter your first name';
+ *     }
+ *   });
+ * @endcode
  */
 ;(function ($) {
   "use strict";
@@ -77,7 +88,19 @@
         init: function () {
           var $label      = settings.labelSelector.call(this, this.$el),
               defaultText = '',
-              tagName     = this.$el.get(0).tagName.toLowerCase();
+              tagName     = this.$el.get(0).tagName.toLowerCase(),
+              self        = this;
+
+          // Setup the breakpoints if necessary
+          if (settings.breakpointX && settings.breakpointDefaultText) {
+            var breakpointHandler = function (from, to) {
+              self.clear();
+              self.defaultText = settings.breakpointDefaultText.call(self, to.name);
+              self.unclear();
+            };
+            settings.breakpointX.add('both', settings.breakpointX.aliases, breakpointHandler)
+            breakpointHandler(null, {name: settings.breakpointX.current});
+          }
 
           // Determine the default text from the label tag...
           if (tagName === 'textarea') {
@@ -137,12 +160,14 @@
             $el.val('');
             this.render();
           }
+          return this;
         },
 
         unclear: function () {
           if (!this.value() && this.defaultText) {
             this.default();
           }
+          return this;
         },
 
         /**
@@ -310,7 +335,22 @@
      */
     labelSelector: function ($el) {
       return $el.siblings('label').first();
-    }
+    },
+
+    /**
+     * Pass in a BreakpointX instance to use for responsive support.
+     *
+     * @link http://www.intheloftstudios.com/packages/js/breakpointX
+     */
+    breakpointX: null,
+
+    /**
+     * A callback for default text per breakpoint.  It receives the current breakpoint alias name as the first
+     * argument, and the BreakpointX object as the seconds.  this points to the LoftLabels instance. This does nothing
+     * unless breakpointX is passed.
+     */
+    breakpointDefaultText: null
+
   };
 
   $.fn.loftLabels.version = function () {
