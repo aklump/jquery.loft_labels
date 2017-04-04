@@ -7,7 +7,7 @@
  * Copyright 2013-2017,
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Tue Apr  4 11:31:17 PDT 2017
+ * Date: Tue Apr  4 11:53:18 PDT 2017
  */
 /**
  * Example for responsive support:
@@ -49,10 +49,10 @@
           }
         }
         if (allValid) {
-          settings.onValid.call(instance, event, groupInstances);
+          settings.onValid && settings.onValid.call(instance, event, groupInstances);
         }
         else {
-          settings.onNotValid.call(instance, event, groupInstances);
+          settings.onNotValid && settings.onNotValid.call(instance, event, groupInstances);
         }
       }
     };
@@ -91,17 +91,6 @@
               tagName     = this.$el.get(0).tagName.toLowerCase(),
               self        = this;
 
-          // Setup the breakpoints if necessary
-          if (settings.breakpointX && settings.breakpointDefaultText) {
-            var breakpointHandler = function (from, to) {
-              self.clear();
-              self.defaultText = settings.breakpointDefaultText.call(self, to.name);
-              self.unclear();
-            };
-            settings.breakpointX.add('both', settings.breakpointX.aliases, breakpointHandler)
-            breakpointHandler(null, {name: settings.breakpointX.current});
-          }
-
           // Determine the default text from the label tag...
           if (tagName === 'textarea') {
             defaultText = this.$el.text();
@@ -112,9 +101,18 @@
             $label.hide();
           }
 
+          // Setup the breakpoints if necessary
+          if (settings.breakpointX && settings.breakpointDefaultText) {
+            defaultText = settings.breakpointDefaultText.call(self, {name: settings.breakpointX.current});
+            settings.breakpointX.add('both', settings.breakpointX.aliases, function (from, to) {
+              self.clear();
+              self.defaultText = settings.breakpointDefaultText.call(self, to.name);
+              self.unclear();
+            });
+          }
+
           // Modify the default text...
-          defaultText = settings.callback.call(this, defaultText);
-          this.defaultText = defaultText;
+          this.defaultText = settings.callback ? settings.callback.call(this, defaultText) : defaultText;
 
           if ($label.length) {
             $label.text(this.defaultText);
@@ -132,7 +130,7 @@
 
           this.render();
           validationHandler(this, {type: 'init'});
-          settings.onInit(this);
+          settings.onInit && settings.onInit(this);
 
           return this;
         },
@@ -178,6 +176,7 @@
             $el.val(this.defaultText);
             this.render();
           }
+          return this;
         },
 
 
@@ -219,6 +218,7 @@
           if (remove) {
             this.$el.removeClass(remove.join(' '));
           }
+          return this;
         }
       };
 
@@ -278,9 +278,7 @@
      * @param defaultText
      * @returns {*}
      */
-    callback: function (defaultText) {
-      return defaultText;
-    },
+    callback: null,
 
     /**
      * A function to call after init has completed.
@@ -289,8 +287,7 @@
      *
      * @param instance
      */
-    onInit: function (instance) {
-    },
+    onInit: null,
 
     /**
      * To turn on validation, you need to set a validationGroup.  All instances of the same group will be used for
@@ -312,8 +309,7 @@
      * @see validationEvents
      * @see validationGroup
      */
-    onValid: function (groupInstances) {
-    },
+    onValid: null,
 
     /**
      * Callback for when all group instances have valid values (not '' nor default)
@@ -323,8 +319,7 @@
      * @see validationEvents
      * @see validationGroup
      */
-    onNotValid: function (groupInstances) {
-    },
+    onNotValid: null,
 
     /**
      * Locate the label element.
