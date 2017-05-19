@@ -14,7 +14,7 @@
  * @code
  *   $('#name').loftLabels({
  *     breakpointX          : new BreakpointX({mobile: 0, desktop: 768}),
- *     breakpointDefaultText: function (alias, bp) {
+ *     breakpointDefaultText: function (alias, minMax, bp) {
  *       return alias === 'mobile' ? 'Name' : 'Enter your first name';
  *     }
  *   });
@@ -91,11 +91,11 @@
           validationTimeout;
 
       var instance = {
-        el         : el,
-        $el        : $el,
+        el: el,
+        $el: $el,
         defaultText: null,
-        settings   : settings,
-        states     : [],
+        settings: settings,
+        states: [],
 
         /**
          * (Re-)Initialize the form element.
@@ -118,10 +118,20 @@
 
           // Setup the breakpoints if necessary
           if (settings.breakpointX && settings.breakpointDefaultText) {
-            defaultText = settings.breakpointDefaultText.call(self, {name: settings.breakpointX.current});
+            defaultText = settings.breakpointDefaultText.call(
+              self,
+              settings.breakpointX.current,
+              settings.breakpointX.value(settings.breakpointX.current),
+              settings.breakpointX
+            );
             settings.breakpointX.add('both', settings.breakpointX.aliases, function (from, to) {
               self.clear();
-              self.defaultText = settings.breakpointDefaultText.call(self, to.name);
+              self.defaultText = settings.breakpointDefaultText.call(
+                self,
+                to.name,
+                settings.breakpointX.value(to.name),
+                settings.breakpointX
+              );
               self.unclear();
             });
           }
@@ -365,8 +375,8 @@
 
     /**
      * A callback for default text per breakpoint.  It receives the current breakpoint alias name as the first
-     * argument, and the BreakpointX object as the seconds.  this points to the LoftLabels instance. This does nothing
-     * unless breakpointX is passed.
+     * argument, an array of min/max widths of the current breakpoint, and the BreakpointX object as the last.  This
+     * points to the LoftLabels instance. This does nothing unless breakpointX is passed.
      */
     breakpointDefaultText: null
 
