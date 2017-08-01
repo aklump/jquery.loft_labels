@@ -41,23 +41,31 @@
   <h2>Example</h2>
 
   <h3>This form is using jquery.loft_labels.js</h3>
+  <p>Notice how the form elements are red because they are not yet filled out. Notice how with valid values they loose
+    the red outline. Notice when all required are filled out the form submit button becomes available with proper
+    text.</p>
   <form class="yes">
     <div class="form-group">
       <label for="search2">Your name</label>
-      <input type="text" id="name" name="name" value=""/>
+      <input type="text" id="name" name="name" value="" class="form-control"/>
     </div>
     <div class="form-group">
       <label for="comment">Share your thoughts...</label>
-      <textarea name="comment" id="comment" cols="30" rows="10"></textarea>
+      <textarea name="comment" id="comment" cols="30" rows="10" class="form-control"></textarea>
     </div>
     <button>Submit</button>
   </form>
 
   <h3>...so is this form</h3>
+  <p>This form has a smaller validation scope, so the second field does not need to be filled out to allow submission.</p>
   <form class="search">
     <div class="form-group">
       <label for="search2">Type to search...</label>
-      <input type="text" id="search2" name="search" value=""/>
+      <input type="text" id="search2" name="search" value="" class="form-control"/>
+    </div>
+    <div class="form-group">
+      <label for="search2">Additional scope (not required)</label>
+      <input type="text" id="scope" name="scope" value="" class="form-control"/>
     </div>
     <button>Find it</button>
   </form>
@@ -66,11 +74,11 @@
   <form class="no">
     <div class="form-group">
       <label for="search2">Your name</label>
-      <input type="text" id="name2" name="name" value=""/>
+      <input type="text" id="name2" name="name" value="" class="form-control"/>
     </div>
     <div class="form-group">
       <label for="comment">Share your thoughts...</label>
-      <textarea name="comment" id="" cols="30" rows="10"></textarea>
+      <textarea name="comment" id="" cols="30" rows="10" class="form-control"></textarea>
     </div>
     <button>Submit</button>
   </form>
@@ -88,24 +96,33 @@
 
       var $button = $('form.search button');
       $('form.search').find('input').loftLabels({
-        validationGroup : 'search',
-        onValid: function(event) {
+        validation: $('#search2'),
+        onAllValid: function (event) {
           console.log(event);
           $button.show();
         },
-        onNotValid: function(event) {
+        onValid: function ($member, event) {
+          console.log(this, $member, event);
+        },
+        onNotValid: function ($member, event) {
           console.log(event);
           $button.hide();
         }
       });
 
-      var $button2  = $('form.yes button');
+      var $button2 = $('form.yes button');
       $('form.yes').find('input, textarea').loftLabels({
-          validationGroup: 'form.yes',
-          onValid: function(){
+          validation: true,
+          onAllValid: function () {
             $button2.html('Houston, we are go!');
           },
-          onNotValid: function(){
+          onValid: function ($member) {
+            var $group = $member.parents('.form-group');
+            $group.removeClass('has-error');
+          },
+          onNotValid: function ($member) {
+            var $group = $member.parents('.form-group');
+            $group.addClass('has-error');
             $button2.html('Abort, abort!');
           },
         }

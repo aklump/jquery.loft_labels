@@ -7,7 +7,7 @@
  * Copyright 2013-2017,
  * @license [name]Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Thu May 18 17:41:42 PDT 2017
+ * Date: Tue Aug  1 14:17:58 PDT 2017
  */
 /**
  * Example for responsive support:
@@ -25,14 +25,20 @@
  *   var $submit = $('.form-submit'),
  *       id      = $('form').attr('id');
  *   $('#name').loftLabels({
- *     validationGroup: id,
- *     onValid        : function () {
- *       if (this.$el.val() === 'Aaron') {
+ *     validation: true,
+ *     onValid        : function ($member, value) {
+ *       if (value === 'Aaron') {
  *         $submit.click();
  *       }
  *     }
  *   });
  * @endcode
+ *
+ * VALIDATION
+ *
+ * - Be careful that if you have more than one form, and you want the fields of each form to validate independently of
+ *   each other, that you process each form to loftLabels separately.  Otherwise if you set validation to true, the
+ *   onAllValid will only fire when all form inputs of all forms are valid.
  */
 ;(function ($) {
   "use strict";
@@ -41,46 +47,52 @@
    * Store all instances on the current page in a global var.
    * @type {Array}
    */
-  $.loftLabels = {
-    instances: []
-  };
-
   $.fn.loftLabels = function (options) {
     var $elements = $(this);
-
-    /**
-     * Fire validation callbacks after examining the values of all group instances.
-     */
-    var validationHandler = function (instance, event) {
-      var settings = instance.settings;
-      if (settings.validationGroup) {
-        var groupInstances = $.loftLabels.instances[settings.validationGroup],
-            allValid       = true;
-        for (var i in groupInstances) {
-          if (!groupInstances[i].value() || groupInstances[i].isDefault()) {
-            allValid = false;
-            break;
-          }
-        }
-        if (allValid) {
-          settings.onValid && settings.onValid.call(instance, event, groupInstances);
-        }
-        else {
-          settings.onNotValid && settings.onNotValid.call(instance, event, groupInstances);
-        }
-      }
-    };
 
     // Do nothing when nothing selected
     if ($elements.length === 0) {
       return;
     }
 
+    /**
+     * Fire validation callbacks after examining the values of all group instances.
+     */
+    var validationHandler = function (instance, event) {
+      var settings = instance.settings;
+      if (settings.validation) {
+        var allValid = true;
+
+        // Cycle through all members to be validated.
+        $members.each(function () {
+          var $member   = $(this),
+              instance  = $member.data('loftLabels'),
+              value     = $member.val(),
+              isDefault = instance ? instance.isDefault() : true;
+
+          if (!value || isDefault) {
+            if (settings.onNotValid) {
+              settings.onNotValid.call(instance, $member, isDefault, value, event);
+            }
+            allValid = false;
+          }
+          else {
+            if (settings.onValid) {
+              settings.onValid.call(instance, $member, value, event);
+            }
+          }
+        });
+        if (allValid) {
+          if (settings.onAllValid) {
+            settings.onAllValid.call(instance, event);
+          }
+        }
+      }
+    };
+
     // Create some defaults, extending them with any options that were provided
     var settings = $.extend({}, $.fn.loftLabels.defaults, options),
-        groupId  = settings.validationGroup || 'global';
-
-    $.loftLabels.instances[groupId] = $.loftLabels.instances[groupId] || [];
+        $members = settings.validation === true ? $elements : settings.validation;
 
     $elements.not('.' + settings.cssPrefix + '-processed')
     .addClass(settings.cssPrefix + '-processed')
@@ -93,6 +105,7 @@
       var instance = {
         el: el,
         $el: $el,
+        $validation: $members,
         defaultText: null,
         settings: settings,
         states: [],
@@ -155,7 +168,9 @@
 
           this.render();
           validationHandler(this, {type: 'init'});
-          settings.onInit && settings.onInit(this);
+          if (settings.onInit) {
+            settings.onInit(this);
+          }
 
           return this;
         },
@@ -247,8 +262,7 @@
         }
       };
 
-      // This must come before init()!
-      $.loftLabels.instances[groupId].push(instance);
+      $el.data('loftLabels', instance);
       instance.init();
 
       // Handlers
@@ -318,14 +332,14 @@
     onInit: null,
 
     /**
-     * To turn on validation, you need to set a validationGroup.  All instances of the same group will be used for
-     * validation.  This would mostly likely be all or some inputs of a single form.  You can use the id of a form, for
-     * example.
+     * To turn on validation of the elements being processed, set this to true.  If validation should happen on a
+     * different set of elements than those provided as the subject of this instance then, you can also provide a
+     * jQuery object with a group of members, all of which must validate for onValid to fire.
      */
-    validationGroup: null,
+    validation: false,
 
     /**
-     * These events on a given instance will trigger validation, if validationGroup is set. e.g. blur paste keyup
+     * These events on a given instance will trigger validation.
      */
     validationEvents: 'blur paste keyup',
 
@@ -336,22 +350,43 @@
     validationThrottle: 100,
 
     /**
-     * Callback for when all group instances have valid values (not '' nor default)
+     * Callback for when a all validation element become valid.
      *
-     * @param groupInstances
+     * @param object event The DOM event that triggered the final validation.
+     *
+     * The loftLabels instance for the element is available as this
+     * All validation members are available as this.$validation
      *
      * @see validationEvents
-     * @see validationGroup
+     */
+    onAllValid: null,
+
+    /**
+     * Callback for when a single validation element becomes valid.
+     *
+     * @param jQuery $member The input element.
+     * @param mixed value The current value of the input.
+     * @param object event The DOM event that triggered validation.
+     *
+     * The loftLabels instance for the element is available as this
+     * All validation members are available as this.$validation
+     *
+     * @see validationEvents
      */
     onValid: null,
 
     /**
-     * Callback for when all group instances have invalid values.
+     * Callback for when a single validation element becomes invalid.
      *
-     * @param groupInstances
+     * @param jQuery $member The input element.
+     * @param bool isDefault True only if the value is the default value.
+     * @param mixed value The current value of the input.
+     * @param object event The DOM event that triggered invalidation.
+     *
+     * The loftLabels instance for the element is available as this
+     * All validation members are available as this.$validation
      *
      * @see validationEvents
-     * @see validationGroup
      */
     onNotValid: null,
 
