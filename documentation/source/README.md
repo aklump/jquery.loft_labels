@@ -1,10 +1,10 @@
 # Loft Labels
 
-![Loft Labels](documentation/www/images/loft-labels.jpg)
+![Loft Labels](images/loft-labels.jpg)
 
 ## Summary
 
-jQuery plugin to move labels into the input element as placeholders with optional lightweight input validation.
+__description
 
 **Visit <https://aklump.github.io/loft_labels> for full demo.**
 

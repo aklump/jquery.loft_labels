@@ -1,9 +1,0 @@
-{
-    "name": "Loft Labels",
-    "version": "0.8",
-    "homepage": "http://www.intheloftstudios.com/packages/jquery/jquery.loft_labels",
-    "authors": [
-        ""
-    ],
-    "description": "jQuery plugin to move textfield labels into the input element itself as the default values."
-}

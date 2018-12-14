@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Usage</title>
+  <link href="search/tipuesearch.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+
+<body class="page--usage">
+<header>
+  <div class="pager">
+  <a href="README.html" class="prev README">&laquo;Loft Labels</a>
+  <a href="index.html" class="index">Index</a>
+  <a href="index.html" class="next index">Index&raquo;</a>
+</div>
+</header>
+
+
+  <h1>Usage</h1>
+  <div class="breadcrumb"><a href="index.html">Index</a></div>
+
+<section><h2>Usage</h2>
+
+<p>For a given form element with a label in the following structure:</p>
+
+<pre><code>&lt;form&gt;
+  &lt;label for="search"&gt;Type to search...&lt;/label&gt;
+  &lt;input type="text" id="search" name="search" value=""/&gt;
+&lt;/form&gt;
+</code></pre>
+
+<p>You would use this jQuery code to make this plugin work:</p>
+
+<pre><code>$('form input').loftLabels();
+</code></pre>
+
+<p>See the plugin file for options to pass.</p>
+
+<h2>Usage without a <code>&lt;label&gt;</code></h2>
+
+<pre><code>&lt;form&gt;
+  &lt;input type="text" id="search" name="search" value=""/&gt;
+&lt;/form&gt;
+</code></pre>
+
+<p>You would use this jQuery code:</p>
+
+<pre><code>$('#search').loftLabels({
+  callback: function() {
+    return 'Type to search...'
+  }
+});
+</code></pre>
+
+<h2>Form validation</h2>
+
+<p>In many cases, you would not want to submit a form that has the default value of the input as it's value.  You can leverage the <code>onChange</code> callback for a client-side form validation function, like the following example illustrates.  Simply monitor the value of the input and disable/enable the submit button as appropriate.</p>
+
+<pre><code>var $submit = $('#form1 submit');
+$('#form1 input').loftLabels({
+  onChange: function (value, isDefault, instances) {
+    if (!value || isDefault) {
+      $submit.attr('disabled', 'disabled');
+    }
+    else {
+      $submit.attr('disabled', '');
+    }
+  },
+});
+</code></pre>
+
+<p>For forms that use more than on input you can review the <code>instances</code> and validate the submit key based on all instance values.  Take a look at <code>demo/index.html</code> for an example of this.</p>
+
+<h2>Capture the instance for later manipulation</h2>
+
+<pre><code>var instance = $('#search').loftLabels({
+  callback: function () {
+    return 'Type to search...'
+  }
+})
+.data('loftLabels');
+
+// instance.el
+// instance.$el
+// instance.defaultText
+// instance.settings
+
+// Call the intializer later on if desired...
+instance.init();
+
+// Get the value of the input...
+var value = instance.value();
+
+// Clear the field if the value is the default...
+instance.clear();
+
+// Restore the field to default if empty...
+instance.unclear();
+
+// Overwrite the field with the default...
+instance.default();
+</code></pre>
+
+<h2>Install with bower</h2>
+
+<pre><code>bower install loft_labels
+</code></pre>
+</section>
+
+<div class="search__results">
+  <div id="tipue_search_content"></div>
+</div>
+
+<footer>
+  <div class="pager">
+  <a href="README.html" class="prev README">&laquo;Loft Labels</a>
+  <a href="index.html" class="index">Index</a>
+  <a href="index.html" class="next index">Index&raquo;</a>
+</div>
+  
+  <div id="footer-legaleeze">
+    <p class="legaleeze center">Version: 1.0.0 &bull; Last Updated: Fri, 14 Dec 2018 15:50:44 -0800</p>
+  </div>
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="js/core.js"></script>
+</body>
+</html>
+
