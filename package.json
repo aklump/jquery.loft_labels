@@ -1,6 +1,6 @@
 {
-    "name": "@aklump/loft-labels",
-    "main": "./dist/jquery.loft-labels.js",
+    "name": "@aklump\/loft-labels",
+    "main": ".\/dist\/jquery.loft-labels.js",
     "keywords": [
         "jquery plugin",
         "ecosystem:jquery"
@@ -13,20 +13,20 @@
         "dist",
         "docs",
         "tests",
-        "documentation/www",
-        "!docs/node_modules"
+        "documentation\/www",
+        "!docs\/node_modules"
     ],
-    "version": "1.0.0",
+    "version": "1.0.1",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/aklump/jquery.loft_labels.git"
+        "url": "git+https:\/\/github.com\/aklump\/jquery.loft_labels.git"
     },
     "author": "Aaron Klump <sourcecode@intheloftstudios.com>",
     "license": "BSD-3-Clause",
     "bugs": {
-        "url": "https://github.com/aklump/jquery.loft_labels/issues"
+        "url": "https:\/\/github.com\/aklump\/jquery.loft_labels\/issues"
     },
-    "homepage": "http://www.intheloftstudios.com/packages/js/jquery.loft_labels",
+    "homepage": "http:\/\/www.intheloftstudios.com\/packages\/js\/jquery.loft_labels",
     "description": "jQuery plugin to move labels into the input element as placeholders with optional lightweight input validation.",
     "devDependencies": {
         "jquery": "^3.3.1",

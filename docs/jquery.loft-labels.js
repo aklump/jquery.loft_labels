@@ -1,5 +1,5 @@
 /**
- * Loft Labels jQuery Plugin v1.0.0
+ * Loft Labels jQuery Plugin v1.0.1
  * http://www.intheloftstudios.com/packages/js/jquery.loft_labels
  *
  * jQuery plugin to move labels into the input element as placeholders with optional lightweight input validation.
@@ -7,7 +7,7 @@
  * Copyright 2013-2018,
  * @license MIT
  *
- * Date: Fri Dec 14 16:36:16 PST 2018
+ * Date: Fri Dec 14 16:37:41 PST 2018
  */
 (function(factory) {
   if (typeof define === 'function' && define.amd) {
@@ -272,7 +272,7 @@
     return this;
   };
   $.fn.loftLabels.version = function() {
-    return '1.0.0';
+    return '1.0.1';
   };
   $.fn.loftLabels.defaults = {
     // The class to add to the textfield when it's in focus.
