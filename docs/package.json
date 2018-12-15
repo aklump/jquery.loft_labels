@@ -1,6 +1,7 @@
 {
     "private": true,
     "dependencies": {
+        "@aklump/breakpointx": "^0.7.1",
         "bootstrap": "^4.1.3",
         "jquery": "^3.3.1"
     }

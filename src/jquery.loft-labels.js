@@ -144,8 +144,7 @@
           )
           .bind('keyup paste', function() {
             detectDefaultState(instance);
-            if (instance.value)
-              renderHtml.call(instance);
+            if (instance.value) renderHtml.call(instance);
           })
           .bind(instance.settings.validationEvents, function(event) {
             clearTimeout(validationTimeout);
@@ -157,14 +156,16 @@
       });
 
     if (this.settings.breakpointX) {
-      this.settings.breakpointX.addCrossAction(function(segment) {
-        // Read in the segment label for all elements.
-        $elements.each(function() {
-          var instance = $(this).data('loftLabels');
-          instance.segment = segment;
-          refreshInstance(instance);
-        });
-      }).triggerActions();
+      this.settings.breakpointX
+        .addCrossAction(function(segment) {
+          // Read in the segment label for all elements.
+          $elements.each(function() {
+            var instance = $(this).data('loftLabels');
+            instance.segment = segment;
+            refreshInstance(instance);
+          });
+        })
+        .triggerActions();
     }
 
     return this;
@@ -355,7 +356,6 @@
     return this;
   }
 
-
   /**
    * Fire validation callbacks after examining the values of all group
    * instances.
@@ -403,7 +403,7 @@
       renderHtml.call(instance);
       return this;
     }
-  };
+  }
 
   /**
    * Update DOM with correct CSS classes.

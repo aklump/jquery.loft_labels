@@ -4,6 +4,11 @@
   <title>Demo of Loft Labels</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <style type="text/css">
+    .loft-labels-is-default {
+      color: #bbb;
+    }
+  </style>
 </head>
 <body>
 <div class="container-fluid">
@@ -13,9 +18,12 @@
   <!-- Key features of jquery.loft_labels.js -->
   <div class="well">
     <ul>
-      <li>Converts labels to default values inside the textfields.</li>
+      <li>Converts labels to default values (placeholders) inside the textfields.</li>
       <li>Simple form validation based on default and non-default values.</li>
-      <li>No CSS is applied, that is left up to you.</li>
+      <li>See also <a href="page2.html">responsive handling.</a></li>
+      <li>Also some
+        <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Labels_and_placeholders">thoughts on using labels</a>.
+      </li>
     </ul>
   </div>
 
@@ -166,7 +174,20 @@ $form.find('input').loftLabels({
       </pre>
     </div>
   </div>
+  <hr/>
+  <div class="mt-4">
+    <h2>Manipulate values with Javascript</h2>
 
+    <p>A simple API to get and set values on elements:</p>
+
+    <h3>Javascript</h3>
+    <pre>
+var obj = $('input').loftLabels().data('loftLabels');
+obj.setValue('alpha');
+obj.getValue();
+obj.getLabel();
+    </pre>
+  </div>
   <hr/>
   <p class="text-muted"><strong>Loft Labels</strong> is brought to you by
     <a href="http://www.intheloftstudios.com">In the Loft Studios</a></p>
