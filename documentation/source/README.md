@@ -4,7 +4,7 @@
 
 __description
 
-**Visit <https://aklump.github.io/jquery.loft_labels/> for full demo.**
+**Visit <__homepage/> for full demo.**
 
 ## Quick Start
 

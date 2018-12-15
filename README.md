@@ -4,7 +4,7 @@
 
 jQuery plugin to move labels into the input element as placeholders with optional lightweight input validation.
 
-**Visit <https://aklump.github.io/jquery.loft_labels/> for full demo.**
+**Visit <http://www.intheloftstudios.com/packages/js/jquery.loft_labels/> for full demo.**
 
 ## Quick Start
 
