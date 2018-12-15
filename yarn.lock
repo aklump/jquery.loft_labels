@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@aklump/breakpointx@^0.7.1":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@aklump/breakpointx/-/breakpointx-0.7.1.tgz#67001ba7bf941919974a883bfbde632e433ecb69"
+  integrity sha512-UeQlsTZOC24U5eJQaDrxP9U6GEnYJHgE+mnVu6Bd14qvsjt+AdaDYyPkVqz6D1HXufjUUWK29a8m7TQRbZz2xQ==
+
 anymatch@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/anymatch/-/anymatch-2.0.0.tgz#bcb24b4f37934d9aa7ac17b4adaf89e7c76ef2eb"

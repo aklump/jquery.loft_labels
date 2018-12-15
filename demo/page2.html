@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Demo of __title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container-fluid">
+  <h1><a href="index.html">__title</a> Demo
+    <small>Responsive Handling</small>
+  </h1>
+  <p class="lead">This demonstrates how you can have different labels based on window widths. It requires
+    <a href="http://intheloftstudios.com/packages/js/breakpointx">Breakpoint X (Crossing)</a>.
+  </p>
+
+  <h2>Demo Instructions</h2>
+  <ol>
+    <li>Change the window width and notice the default label changes across 3 different segments.</li>
+  </ol>
+  <hr/>
+
+  <div class="my-4">
+    <h2>Responsive Labels</h2>
+
+    <p>This page contains two breakpoints as shown. There are three label options.  The label changes as the width of the browser does so.  This is achieved by using data attributes following this pattern <code>data-label-{segment name}="{segment label}"</code>.  If you omit a value for one or more segments, the fallback is the innerHTML of the label.</p>
+
+    <p><img src="images/breakpoints.png" alt="An image showing two breakpoints">
+    </p>
+
+    <label for="responsive-demo" data-label-medium="Medium label" data-label-large="Large label">Small label</label>
+    <input type="text" name="responsive_demo" id="responsive-demo"/>
+
+    <div class="my-4">
+      <h3>HTML</h3>
+      <pre>
+&lt;label for="responsive-demo" data-label-medium="Medium label" data-label-large="Large label">Small label&lt;/label>
+&lt;input type="text" name="responsive_demo" id="responsive-demo"/>
+    </pre>
+
+      <h3>Javascript</h3>
+      <pre>
+$('input').loftLabels({
+  breakpointX: new BreakpointX([480, 768], ['small', 'medium', 'large']),
+});
+      </pre>
+    </div>
+
+  </div>
+
+  <hr/>
+  <p class="text-muted"><strong>__title</strong> is brought to you by
+    <a href="http://www.intheloftstudios.com">In the Loft Studios</a></p>
+</div>
+<script src="node_modules/jquery/dist/jquery.slim.js"></script>
+<script src="node_modules/@aklump/breakpointx/dist/BreakpointX.min.js"></script>
+<script src="../src/jquery.loft-labels.js"></script>
+<script>
+  (function($) {
+    $('document').ready(function() {
+      var i = $('input').loftLabels({
+        breakpointX: new BreakpointX([480, 768], ['small', 'medium', 'large']),
+      });
+      console.log(i.data('loftLabels'));
+    });
+  })(jQuery);
+</script>
+</body>
+</html>

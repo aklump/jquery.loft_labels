@@ -6,6 +6,71 @@
  * @{
  */
 
+QUnit.test('Label with value is not affected by change of segment',
+  function(assert) {
+    $('#qunit-fixture').html(markupResponsive);
+    var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
+    var instance = $('#responsive-demo')
+      .loftLabels({ breakpointX: bpx })
+      .data('loftLabels');
+    instance.setValue('Sunrise');
+    bpx.triggerActions(300);
+    assert.strictEqual(instance.getValue(), 'Sunrise');
+    assert.strictEqual(instance.getLabel(), 'Small label');
+
+    bpx.onWindowResize(500);
+    assert.strictEqual(instance.getValue(), 'Sunrise');
+    assert.strictEqual(instance.getLabel(), 'Medium label');
+
+    bpx.onWindowResize(1000);
+    assert.strictEqual(instance.getValue(), 'Sunrise');
+    assert.strictEqual(instance.getLabel(), 'Large label');
+  });
+
+QUnit.test('GetLabels works as expected', function(assert) {
+  $('#qunit-fixture').html(markup);
+  var $el = $('#search');
+  var instance = $el.loftLabels().data('loftLabels');
+  assert.strictEqual(instance.getLabel(), 'Type to search...');
+  assert.strictEqual($el.val(), 'Type to search...');
+  instance.setValue('blue trousers');
+  assert.strictEqual($el.val(), 'blue trousers');
+  assert.strictEqual(instance.getLabel(), 'Type to search...');
+});
+
+QUnit.test('SetValue works as expected', function(assert) {
+  $('#qunit-fixture').html(markup);
+  var $el = $('#search');
+  var instance = $el.loftLabels().data('loftLabels');
+  assert.strictEqual($el.val(), 'Type to search...');
+  assert.ok($el.hasClass('loft-labels-is-default'));
+  instance.setValue('Search...').getValue();
+  assert.strictEqual($el.val(), 'Search...');
+  assert.notOk($el.hasClass('loft-labels-is-default'));
+});
+
+QUnit.test('GetValue works as expected and trims whitespace', function(assert) {
+  $('#qunit-fixture').html(markup);
+  var $el = $('#search');
+  var instance = $el.loftLabels().data('loftLabels');
+  instance.setValue('    my value     ');
+  assert.strictEqual(instance.getValue(), 'my value');
+});
+
+QUnit.test('Default Label changes for each breakpoint', function(assert) {
+  $('#qunit-fixture').html(markupResponsive);
+  var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
+  var instance = $('#responsive-demo').loftLabels({
+    breakpointX: bpx,
+  }).data('loftLabels');
+  bpx.triggerActions(300);
+  assert.strictEqual(instance.getValue(), 'Small label');
+  bpx.onWindowResize(500);
+  assert.strictEqual(instance.getValue(), 'Medium label');
+  bpx.onWindowResize(1000);
+  assert.strictEqual(instance.getValue(), 'Large label');
+});
+
 QUnit.test('Assert default value clears on focus, does not return when blur has value.', function(assert) {
   $('#qunit-fixture').html(markupFormWithThreeInputs);
   var $input = $('[name=do]');
@@ -182,7 +247,7 @@ QUnit.test('Assert labelSelector works to locate the label and hides the alterna
 });
 
 
-QUnit.test('Test instance.default for textarea.', function(assert) {
+QUnit.test('Test instance.defaultText for textarea.', function(assert) {
   $('#qunit-fixture').append(markup);
   var $el = $('#testcase textarea');
   assert.strictEqual(
@@ -191,7 +256,7 @@ QUnit.test('Test instance.default for textarea.', function(assert) {
   );
 });
 
-QUnit.test('Test instance.default for textfield.', function(assert) {
+QUnit.test('Test instance.defaultText for textfield.', function(assert) {
   $('#qunit-fixture').append(markup);
   var $el = $('#testcase input');
   assert.strictEqual(
@@ -246,23 +311,23 @@ QUnit.test('Test instance.clear/unclear for textarea.', function(assert) {
   $el.loftLabels();
   var instance = $el.data('loftLabels');
 
-  instance.clear();
+  $el.focus();
   assert.strictEqual('', instance.$el.val());
 
-  instance.unclear();
+  $el.blur();
   assert.strictEqual(defaultText, instance.$el.val());
 
-  instance.$el.val('not default');
+  instance.setValue('not default');
 
   // Does not clear if the value is not the default.
-  instance.clear();
+  $el.focus();
   assert.strictEqual('not default', instance.$el.val());
 
-  instance.unclear();
+  $el.blur();
   assert.strictEqual('not default', instance.$el.val());
 
   // Goes back to default regardless of the value,.
-  instance.default();
+  instance.setValue(instance.getLabel());
   assert.strictEqual(defaultText, instance.$el.val());
 });
 QUnit.test('Test instance.clear/unclear for textfield.', function(assert) {
@@ -271,23 +336,23 @@ QUnit.test('Test instance.clear/unclear for textfield.', function(assert) {
     defaultText = 'Type to search...',
     instance = $el.loftLabels({}).data('loftLabels');
 
-  instance.clear();
+  $el.focus();
   assert.strictEqual('', instance.$el.val());
 
-  instance.unclear();
+  $el.blur();
   assert.strictEqual(defaultText, instance.$el.val());
 
-  instance.$el.val('not default');
+  instance.setValue('not default');
 
   // Does not clear if the value is not the default.
-  instance.clear();
+  $el.focus();
   assert.strictEqual('not default', instance.$el.val());
 
-  instance.unclear();
+  $el.blur();
   assert.strictEqual('not default', instance.$el.val());
 
   // Goes back to default regardless of the value,.
-  instance.default();
+  instance.setValue(instance.getLabel());
   assert.strictEqual(defaultText, instance.$el.val());
 });
 QUnit.test('Check custom classes on focus, blur and hover.', function(assert) {
@@ -462,17 +527,16 @@ var markupScopeForm = '<form id="testcase">\n' +
   '    <button>Register</button>\n' +
   '  </form>';
 
+var markupResponsive = '<label for="responsive-demo" data-label-medium="Medium label" data-label-large="Large label">Small label</label>\n' +
+  '    <input type="text" name="responsive_demo" id="responsive-demo"/>';
+
 function assertInstance(assert, instance) {
   assert.ok(instance.defaultText);
-  assert.strictEqual('object', typeof instance.el);
   assert.strictEqual('object', typeof instance.$el);
+  assert.strictEqual('object', typeof instance.$label);
   assert.strictEqual('object', typeof instance.settings);
   assert.strictEqual('object', typeof instance.states);
-  assert.strictEqual('function', typeof instance.clear);
-  assert.strictEqual('function', typeof instance.default);
-  assert.strictEqual('function', typeof instance.init);
-  assert.strictEqual('function', typeof instance.isDefault);
-  assert.strictEqual('function', typeof instance.render);
-  assert.strictEqual('function', typeof instance.unclear);
-  assert.strictEqual('function', typeof instance.value);
+  assert.strictEqual('function', typeof instance.getValue);
+  assert.strictEqual('function', typeof instance.setValue);
+  assert.strictEqual('function', typeof instance.getLabel);
 }
