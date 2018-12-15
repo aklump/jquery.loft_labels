@@ -3,7 +3,10 @@
     "main": ".\/dist\/jquery.loft-labels.js",
     "keywords": [
         "jquery plugin",
-        "ecosystem:jquery"
+        "ecosystem:jquery",
+        "forms",
+        "placeholder text",
+        "client-side form validation"
     ],
     "title": "Loft Labels",
     "files": [
