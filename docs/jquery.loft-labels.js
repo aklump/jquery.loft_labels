@@ -7,7 +7,7 @@
  * Copyright 2013-2018,
  * @license MIT
  *
- * Date: Fri Dec 14 16:20:52 PST 2018
+ * Date: Fri Dec 14 16:26:36 PST 2018
  */
 (function(factory) {
   if (typeof define === 'function' && define.amd) {
