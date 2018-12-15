@@ -26,7 +26,7 @@
     "bugs": {
         "url": "https://github.com/aklump/jquery.loft_labels/issues"
     },
-    "homepage": "http://www.intheloftstudios.com/packages/js/loft-labels",
+    "homepage": "http://www.intheloftstudios.com/packages/js/jquery.loft_labels",
     "description": "jQuery plugin to move labels into the input element as placeholders with optional lightweight input validation.",
     "devDependencies": {
         "jquery": "^3.3.1",
