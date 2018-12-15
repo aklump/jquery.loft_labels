@@ -4,7 +4,7 @@
 
 __description
 
-**Visit <__homepage/> for full demo.**
+**Visit <__homepage> for full demo.**
 
 ## Quick Start
 
