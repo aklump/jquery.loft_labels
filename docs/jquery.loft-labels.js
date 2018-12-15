@@ -1,5 +1,5 @@
 /**
- * Loft Labels jQuery Plugin v1.0.1
+ * Loft Labels jQuery Plugin v1.1.0
  * http://www.intheloftstudios.com/packages/js/jquery.loft_labels
  *
  * jQuery plugin to move labels into the input element as placeholders with optional lightweight input validation.
@@ -7,7 +7,7 @@
  * Copyright 2013-2018,
  * @license MIT
  *
- * Date: Fri Dec 14 16:37:41 PST 2018
+ * Date: Sat Dec 15 08:37:31 PST 2018
  */
 (function(factory) {
   if (typeof define === 'function' && define.amd) {
@@ -46,44 +46,6 @@
       return;
     }
 
-    /**
-     * Fire validation callbacks after examining the values of all group
-     * instances.
-     */
-    var validationHandler = function(instance, event) {
-      var settings = instance.settings;
-      if (!settings.validation) {
-        return;
-      }
-      var validCount = 0;
-
-      // Cycle through all members to be validated.
-      $members.each(function() {
-        var $member = $(this),
-          instance = $member.data(pluginName);
-        // A member is not a member yet if it's not instantiated, this can be
-        // the case on init.
-        if (!instance) return;
-        var value = $member.val(),
-          isDefault = instance ? instance.isDefault() : true;
-        if (!value || isDefault) {
-          if (typeof settings.onNotValid === 'function') {
-            settings.onNotValid.call(instance, value, event);
-          }
-        } else {
-          validCount++;
-          if (typeof settings.onValid === 'function') {
-            settings.onValid.call(instance, value, event);
-          }
-        }
-      });
-      if (validCount === $members.length) {
-        if (typeof settings.onAllValid === 'function') {
-          settings.onAllValid.call(instance, event);
-        }
-      }
-    };
-
     // Create some defaults, extending them with any options that were provided
     var settings = $.extend({}, $.fn.loftLabels.defaults, options),
       $members = settings.validation === true ? $elements : settings.validation;
@@ -93,68 +55,53 @@
       .addClass(settings.cssPrefix + '-processed')
       .each(function() {
         // Setup: Move the label into the field
-        var el = this,
-          $el = $(this),
+        var $el = $(this),
           validationTimeout;
 
         var instance = {
-          el: el,
           $el: $el,
           $validation: $members,
           defaultText: null,
           settings: settings,
+          hasPlaceholderText: null,
           states: [],
 
           /**
-           * (Re-)Initialize the form element.
+           * Set the value of the input field.
+           *
+           * Use this instead of the jQuery .val() method as it handles extra
+           * work for you.
+           *
+           * @param value
            */
-          init: function() {
-            var $label = settings.labelSelector.call(this, this.$el),
-              defaultText = '',
-              tagName = this.$el.get(0).tagName.toLowerCase();
-
-            // Determine the default text from the label tag...
-            if (tagName === 'textarea') {
-              defaultText = this.$el.text();
-            }
-
-            if ($label.length) {
-              defaultText = $.trim($label.text());
-              $label.hide();
-            }
-
-            // Modify the default text...
-            this.defaultText = settings.callback
-              ? settings.callback.call(this, defaultText)
-              : defaultText;
-
-            if ($label.length) {
-              $label.text(this.defaultText);
-            }
-
-            // If we have a value in the form, this plugin is moot.
-            if (this.value()) {
-              this.$el.addClass(settings.focus);
-              return $(this);
-            } else {
-              this.default();
-              this.$el.removeClass(settings.focus);
-            }
-
-            this.render();
-            validationHandler(this, { type: 'init' });
-            if (typeof settings.onInit === 'function') {
-              settings.onInit(this);
-            }
-
+          setValue: function(value) {
+            this.$el.val(value).keyup();
+            renderHtml.call(this);
             return this;
           },
 
           /**
-           * Get the current value.
+           * Get the value of the input field with whitespace trimmed.
+           * @returns {string}
            */
-          value: function() {
-            return $.trim($el.val());
+          getValue: function() {
+            return $.trim(this.$el.val());
+          },
+
+          /**
+           * Return the label based on the current context.
+           *
+           * If using BreakpointX the label is based on segment.
+           *
+           * @returns {null}
+           */
+          getLabel: function() {
+            var placeholder = this.defaultText;
+            if (this.segment) {
+              var name = 'data-' + this.settings.dataPrefix + this.segment.name,
+                placeholder = this.$label.attr(name) || placeholder;
+            }
+            return placeholder;
           },
 
           /**
@@ -162,117 +109,69 @@
            * @returns {boolean}
            */
           isDefault: function() {
-            return this.value() === this.defaultText;
-          },
-
-          /**
-           * Clear the value of the input, only if it is the default value.
-           */
-          clear: function() {
-            if (this.isDefault()) {
-              $el.val('');
-              this.render();
-            }
-            return this;
-          },
-
-          unclear: function() {
-            if (!this.value() && this.defaultText) {
-              this.default();
-            }
-            return this;
-          },
-
-          /**
-           * Set the value of the input to the default, overwriting current
-           * value.
-           */
-          default: function() {
-            if ($el.val() !== this.defaultText) {
-              $el.val(this.defaultText);
-              this.render();
-            }
-            return this;
-          },
-
-          /**
-           * Update DOM with correct CSS classes.
-           */
-          render: function() {
-            var add = [],
-              remove = [];
-
-            // Hover
-            if (this.states.hover) {
-              add.push(settings.hover);
-            } else {
-              remove.push(settings.hover);
-            }
-
-            // Focus
-            if (this.states.focus) {
-              add.push(settings.focus);
-            } else {
-              remove.push(settings.focus);
-            }
-
-            // Default
-            if (this.isDefault()) {
-              add.push(settings.default);
-            } else {
-              remove.push(settings.default);
-            }
-
-            // Now process the DOM.
-            if (add) {
-              this.$el.addClass(add.join(' '));
-            }
-            if (remove) {
-              this.$el.removeClass(remove.join(' '));
-            }
-            return this;
+            return this.getValue() === this.defaultText;
           },
         };
 
         $el.data(pluginName, instance);
-        instance.init();
+        initializeInstance.call(instance);
+        detectDefaultState(instance);
 
         // Handlers
         $el
           .bind('focus', function() {
+            instance.hasPlaceholderText || detectDefaultState(instance);
             instance.states.focus = true;
-            instance.clear();
+            if (instance.hasPlaceholderText) {
+              $el.val('');
+              renderHtml.call(instance);
+            }
           })
           .bind('blur', function() {
+            detectDefaultState(instance);
             instance.states.focus = false;
-            instance.unclear();
+            refreshInstance(instance);
           })
           .hover(
             function() {
               instance.states.hover = true;
-              instance.render();
+              renderHtml.call(instance);
             },
             function() {
               instance.states.hover = false;
-              instance.render();
+              renderHtml.call(instance);
             }
           )
           .bind('keyup paste', function() {
-            instance.render();
+            detectDefaultState(instance);
+            if (instance.value) renderHtml.call(instance);
           })
           .bind(instance.settings.validationEvents, function(event) {
             clearTimeout(validationTimeout);
             validationTimeout = setTimeout(function() {
-              validationHandler(instance, event);
+              validationHandler(instance, event, $members);
             }, settings.validationThrottle);
           })
           .data(pluginName, instance);
       });
 
+    if (this.settings.breakpointX) {
+      this.settings.breakpointX
+        .addCrossAction(function(segment) {
+          // Read in the segment label for all elements.
+          $elements.each(function() {
+            var instance = $(this).data('loftLabels');
+            instance.segment = segment;
+            refreshInstance(instance);
+          });
+        })
+        .triggerActions();
+    }
+
     return this;
   };
   $.fn.loftLabels.version = function() {
-    return '1.0.1';
+    return '1.1.0';
   };
   $.fn.loftLabels.defaults = {
     // The class to add to the textfield when it's in focus.
@@ -289,10 +188,29 @@
     cssPrefix: 'loft-labels',
 
     /**
+     * A prefix to use for data elements, e.g. "data-{prefix}"
+     *
+     * This is used for reponsive support.
+     *
+     * @var string
+     */
+    dataPrefix: 'label-',
+
+    /**
+     * For responsive support pass a BreakpointX instance.
+     *
+     * @link https://github.com/aklump/breakpointX
+     *
+     * @var BreakpointX
+     */
+    breakpointX: null,
+
+    /**
      * Modify the label string.
      *
-     * Used this to alter the label string before it's placed into the
-     * textfield. The instance is available as 'this'.
+     * Use this to alter the label string before it's placed into the
+     * textfield. The instance is available as 'this'.  This happens once
+     * during the init phase.
      *
      * @param defaultText
      * @returns {*}
@@ -394,4 +312,127 @@
   $.fn.loftLabels.prototype.destroy = function() {
     this.$el.removeData(pluginName);
   };
+
+  function detectDefaultState(instance) {
+    instance.hasPlaceholderText = instance.isDefault() || !instance.getValue();
+  }
+
+  function initializeInstance() {
+    var s = this.settings;
+    var tagName = this.$el.get(0).tagName.toLowerCase();
+    this.$label = s.labelSelector.call(this, this.$el);
+
+    // Determine the default text from the markup.
+    if (tagName === 'textarea') {
+      this.defaultText = this.$el.text();
+    }
+    if (this.$label.length) {
+      this.defaultText = this.$label.text();
+      this.$label.hide();
+    }
+
+    // Modify the default text...
+    this.defaultText = $.trim(this.defaultText);
+    this.defaultText = s.callback
+      ? s.callback.call(this, this.defaultText)
+      : this.defaultText;
+
+    // If we have a value in the form, this plugin is moot.
+    if (this.getValue()) {
+      this.$el.addClass(s.focus);
+      return $(this);
+    } else {
+      this.setValue(this.getLabel());
+      this.$el.removeClass(s.focus);
+    }
+
+    renderHtml.call(this);
+    validationHandler(this, { type: 'init' }, this.$validation);
+    if (typeof s.onInit === 'function') {
+      s.onInit(this);
+    }
+    detectDefaultState(this);
+
+    return this;
+  }
+
+  /**
+   * Fire validation callbacks after examining the values of all group
+   * instances.
+   */
+  var validationHandler = function(instance, event, $members) {
+    var settings = instance.settings;
+    if (!settings.validation) {
+      return;
+    }
+    var validCount = 0;
+
+    // Cycle through all members to be validated.
+    $members.each(function() {
+      var $member = $(this),
+        instance = $member.data(pluginName);
+      // A member is not a member yet if it's not instantiated, this can be
+      // the case on init.
+      if (!instance) return;
+      var value = $member.val(),
+        isDefault = instance ? instance.isDefault() : true;
+      if (!value || isDefault) {
+        if (typeof settings.onNotValid === 'function') {
+          settings.onNotValid.call(instance, value, event);
+        }
+      } else {
+        validCount++;
+        if (typeof settings.onValid === 'function') {
+          settings.onValid.call(instance, value, event);
+        }
+      }
+    });
+    if (validCount === $members.length) {
+      if (typeof settings.onAllValid === 'function') {
+        settings.onAllValid.call(instance, event);
+      }
+    }
+  };
+
+  /**
+   * If displaying default text, make sure it's correct.
+   */
+  function refreshInstance(instance) {
+    if (instance.hasPlaceholderText) {
+      instance.$el.val(instance.getLabel());
+      renderHtml.call(instance);
+      return this;
+    }
+  }
+
+  /**
+   * Update DOM with correct CSS classes.
+   */
+  function renderHtml() {
+    var add = [],
+      remove = [],
+      s = this.settings;
+    if (this.states.hover) {
+      add.push(s.hover);
+    } else {
+      remove.push(s.hover);
+    }
+    if (this.states.focus) {
+      add.push(s.focus);
+    } else {
+      remove.push(s.focus);
+    }
+    if (this.isDefault()) {
+      add.push(s.default);
+    } else {
+      remove.push(s.default);
+    }
+    if (add) {
+      this.$el.addClass(add.join(' '));
+    }
+    if (remove) {
+      this.$el.removeClass(remove.join(' '));
+    }
+    return this;
+  }
 });
