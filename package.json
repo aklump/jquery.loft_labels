@@ -32,7 +32,7 @@
     "homepage": "http:\/\/www.intheloftstudios.com\/packages\/js\/jquery.loft_labels",
     "description": "jQuery plugin to move labels into the input element as placeholders with optional lightweight input validation.",
     "devDependencies": {
-        "@aklump\/breakpointx": "^0.7.1",
+        "@aklump\/breakpointx": "^0.7.2",
         "jquery": "^3.3.1",
         "prettier": "^1.15.3",
         "qunit": "^2.8.0"
