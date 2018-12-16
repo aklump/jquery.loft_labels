@@ -10,57 +10,71 @@
  * @{
  */
 
-// QUnit.test('Using validation with responsive with default value triggers onNotValid on instantation and not onValid', function(assert) {
-//   $('#qunit-fixture').html(markup);
-//   var $el = $('#testcase input');
-//   var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
-//
-//   // var onNotValidIsCalled = assert.async();
-//   $el.loftLabels({
-//     breakpointX: bpx
-//     segment: bpx.getSegment(1000),
-//     onGetLabel: function(label) {
-//       if (this.segment.name !== 'small') {
-//         return 'Type to search my website';
-//       }
-//       return label;
-//     },
-//     validation: true,
-//     onValid: function(value) {
-//       console.log('onValid');
-//       assert.ok(value);
-//     },
-//     onNotValid: function(value) {
-//       console.log('onNotValid');
-//       assert.ok(value);
-//       // onNotValidIsCalled();
-//       assert.ok(true);
-//     }
-//   });
-// });
-// QUnit.test('Using validation default value triggers onNotValid on instantation', function(assert) {
-//   $('#qunit-fixture').html(markup);
-//   var $el = $('#testcase input');
-//
-//   var onNotValidIsCalled = assert.async();
-//   $el.loftLabels({
-//     onGetLabel: function(label) {
-//       if (this.segment.name !== 'small') {
-//         return 'Type to search my website';
-//       }
-//       return label;
-//     },
-//     validation: true,
-//     onValid: function(value) {
-//       console.log('onValid');
-//     },
-//     onNotValid: function(value) {
-//       console.log('onNotValid');
-//       assert.ok(value);
-//       onNotValidIsCalled();
-//     }
-//   });
-// });
+QUnit.test(
+  'Using validation with responsive with default value triggers onNotValid on instantation and not onValid',
+  function(assert) {
+    $('#qunit-fixture').html(markup);
+    var $el = $('#testcase input');
+    var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
+    var onValidCalledCount = 0;
+    var onNotValidIsCalled = assert.async();
+    $el.loftLabels({
+      breakpointX: bpx,
+      segment: bpx.getSegment(1000),
+      onGetLabel: function(label) {
+        if (this.segment.name !== 'small') {
+          return 'Type to search my website';
+        }
+        return label;
+      },
+      validation: true,
+      onValid: function() {
+        onValidCalledCount++;
+      },
+      onNotValid: function(value) {
+        console.log('onNotValid');
+        assert.ok(value);
+        onNotValidIsCalled();
+        assert.ok(true);
+      },
+      onInit: function() {
+        assert.strictEqual(onValidCalledCount, 0);
+      },
+    });
+  }
+);
+
+QUnit.test(
+  'Using validation default value triggers onNotValid on instantation',
+  function(assert) {
+    $('#qunit-fixture').html(markup);
+    var $el = $('#testcase input');
+    var onNotValidCalledCount = 0;
+    var onValidCalledCount = 0;
+    var onNotValidIsCalled = assert.async();
+    $el.loftLabels({
+      onGetLabel: function(label) {
+        if (this.segment.name !== 'small') {
+          return 'Type to search my website';
+        }
+        return label;
+      },
+      validation: true,
+      onValid: function() {
+        onValidCalledCount++;
+      },
+      onNotValid: function(value) {
+        assert.ok(value);
+        onNotValidIsCalled();
+        onNotValidCalledCount++;
+      },
+      onInit: function() {
+        assert.strictEqual(onNotValidCalledCount, 1);
+        assert.strictEqual(onValidCalledCount, 0);
+      },
+    });
+  }
+);
 
 QUnit.test('Test instance.clear/unclear for textarea.', function(assert) {
   $('#qunit-fixture').append(markup);
@@ -89,45 +103,47 @@ QUnit.test('Test instance.clear/unclear for textarea.', function(assert) {
   assert.strictEqual(defaultText, instance.$el.val());
 });
 
-QUnit.test('Assert onAllValid fires when validation is a jQuery object of lesser scope on keyup.', function(assert) {
-  $('#qunit-fixture').html(markupScopeForm);
-  var $form = $('#testcase');
-  var onValidCalled = assert.async(1);
-  $form.find('input').loftLabels({
-    validation: $form.find('input:not(#phone)'),
-    onAllValid: function(event) {
-      assert.ok(event.type);
-      onValidCalled();
-    }
-  });
-  $('#name, #email').val('lorem');
-  $('#name').keyup();
-});
+QUnit.test(
+  'Assert onAllValid fires when validation is a jQuery object of lesser scope on keyup.',
+  function(assert) {
+    $('#qunit-fixture').html(markupScopeForm);
+    var $form = $('#testcase');
+    var onValidCalled = assert.async(1);
+    $form.find('input').loftLabels({
+      validation: $form.find('input:not(#phone)'),
+      onAllValid: function(event) {
+        assert.ok(event.type);
+        onValidCalled();
+      },
+    });
+    $('#name, #email').val('lorem');
+    $('#name').keyup();
+  }
+);
 
-
-QUnit.test('Assert onAllValid receives correct arguments on blur', function(assert) {
+QUnit.test('Assert onAllValid receives correct arguments on blur', function(
+  assert
+) {
   $('#qunit-fixture').html(markupExample2);
   var $form = $('#testcase'),
     $input = $form.find('input'),
     $textarea = $form.find('textarea');
   var onAllValid = assert.async(1);
-  $textarea.add($input)
-    .loftLabels({
-      validation: true,
-      onAllValid: function(event) {
-        assert.strictEqual(event.type, 'blur');
-        assert.ok(this.$el.filter('#comment').length === 1);
-        assert.ok(this.$validation.length === 2);
-        onAllValid();
-      }
-    });
-  $textarea
-    .add($input)
-    .val('lorem');
+  $textarea.add($input).loftLabels({
+    validation: true,
+    onAllValid: function(event) {
+      assert.strictEqual(event.type, 'blur');
+      assert.ok(this.$el.filter('#comment').length === 1);
+      assert.ok(this.$validation.length === 2);
+      onAllValid();
+    },
+  });
+  $textarea.add($input).val('lorem');
   $textarea.blur();
 });
 
-QUnit.test('onGetLabel is fired for each breakpoint cross and has .segment',
+QUnit.test(
+  'onGetLabel is fired for each breakpoint cross and has .segment',
   function(assert) {
     $('#qunit-fixture').html(markup);
     var isCalledSmall = assert.async();
@@ -139,56 +155,68 @@ QUnit.test('onGetLabel is fired for each breakpoint cross and has .segment',
     var isCalledLarge = assert.async(2);
     var $el = $('#testcase input');
     var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
-    $el.loftLabels({
-      segment: bpx.getSegment(300),
-      onGetLabel: function(label) {
-        assert.ok(label);
-        assert.ok(this.segment.name);
-        this.segment.name === 'small' && isCalledSmall();
-        this.segment.name === 'medium' && isCalledMedium();
-        this.segment.name === 'large' && isCalledLarge();
-      }, breakpointX: bpx,
-    }).data('loftLabels');
-    bpx
-      .onWindowResize(500)
-      .onWindowResize(900);
-  });
+    $el
+      .loftLabels({
+        segment: bpx.getSegment(300),
+        onGetLabel: function(label) {
+          assert.ok(label);
+          assert.ok(this.segment.name);
+          this.segment.name === 'small' && isCalledSmall();
+          this.segment.name === 'medium' && isCalledMedium();
+          this.segment.name === 'large' && isCalledLarge();
+        },
+        breakpointX: bpx,
+      })
+      .data('loftLabels');
+    bpx.onWindowResize(500).onWindowResize(900);
+  }
+);
 
-QUnit.test('Test the onGetLabel callback is called for .getLabel().', function(assert) {
+QUnit.test('Test the onGetLabel callback is called for .getLabel().', function(
+  assert
+) {
   $('#qunit-fixture').append(markup);
   var $el = $('#testcase input');
   var received = assert.async(2);
-  var instance = $el.loftLabels({
-    onGetLabel: function(label) {
-      assert.strictEqual('Type to search...', label);
-      received();
+  var instance = $el
+    .loftLabels({
+      onGetLabel: function(label) {
+        assert.strictEqual('Type to search...', label);
+        received();
 
-      return 'Search';
-    },
-  }).data('loftLabels');
+        return 'Search';
+      },
+    })
+    .data('loftLabels');
   assert.strictEqual(instance.getLabel(), 'Search');
 });
 
-QUnit.test('Test the correct label value is set on instantiation when onGetLabel is used.', function(assert) {
-  $('#qunit-fixture').append(markup);
-  var $el = $('#testcase input');
-  $el.loftLabels({
-    onGetLabel: function(label) {
-      assert.strictEqual('Type to search...', label);
-      return 'Search';
-    },
-  }).data('loftLabels');
-  assert.strictEqual($el.val(), 'Search');
-});
-
+QUnit.test(
+  'Test the correct label value is set on instantiation when onGetLabel is used.',
+  function(assert) {
+    $('#qunit-fixture').append(markup);
+    var $el = $('#testcase input');
+    $el
+      .loftLabels({
+        onGetLabel: function(label) {
+          assert.strictEqual('Type to search...', label);
+          return 'Search';
+        },
+      })
+      .data('loftLabels');
+    assert.strictEqual($el.val(), 'Search');
+  }
+);
 
 QUnit.test('Default Label changes for each breakpoint', function(assert) {
   $('#qunit-fixture').html(markupResponsive);
   var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
-  var instance = $('#responsive-demo').loftLabels({
-    segment: bpx.getSegment(300),
-    breakpointX: bpx,
-  }).data('loftLabels');
+  var instance = $('#responsive-demo')
+    .loftLabels({
+      segment: bpx.getSegment(300),
+      breakpointX: bpx,
+    })
+    .data('loftLabels');
 
   assert.strictEqual(instance.$el.val(), 'Small label');
   assert.strictEqual(instance.getValue(), 'Small label');
@@ -200,29 +228,30 @@ QUnit.test('Default Label changes for each breakpoint', function(assert) {
   assert.strictEqual(instance.getValue(), 'Large label');
 });
 
-QUnit.test('Label with value is not affected by change of segment',
-  function(assert) {
-    $('#qunit-fixture').html(markupResponsive);
-    var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
-    var instance = $('#responsive-demo')
-      .loftLabels({
-        segment: bpx.getSegment(300),
-        breakpointX: bpx
-      })
-      .data('loftLabels');
-    instance.setValue('Sunrise');
+QUnit.test('Label with value is not affected by change of segment', function(
+  assert
+) {
+  $('#qunit-fixture').html(markupResponsive);
+  var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
+  var instance = $('#responsive-demo')
+    .loftLabels({
+      segment: bpx.getSegment(300),
+      breakpointX: bpx,
+    })
+    .data('loftLabels');
+  instance.setValue('Sunrise');
 
-    assert.strictEqual(instance.getValue(), 'Sunrise');
-    assert.strictEqual(instance.getLabel(), 'Small label');
+  assert.strictEqual(instance.getValue(), 'Sunrise');
+  assert.strictEqual(instance.getLabel(), 'Small label');
 
-    bpx.onWindowResize(500);
-    assert.strictEqual(instance.getValue(), 'Sunrise');
-    assert.strictEqual(instance.getLabel(), 'Medium label');
+  bpx.onWindowResize(500);
+  assert.strictEqual(instance.getValue(), 'Sunrise');
+  assert.strictEqual(instance.getLabel(), 'Medium label');
 
-    bpx.onWindowResize(1000);
-    assert.strictEqual(instance.getValue(), 'Sunrise');
-    assert.strictEqual(instance.getLabel(), 'Large label');
-  });
+  bpx.onWindowResize(1000);
+  assert.strictEqual(instance.getValue(), 'Sunrise');
+  assert.strictEqual(instance.getLabel(), 'Large label');
+});
 
 QUnit.test('GetLabels works as expected', function(assert) {
   $('#qunit-fixture').html(markup);
@@ -254,121 +283,137 @@ QUnit.test('GetValue works as expected and trims whitespace', function(assert) {
   assert.strictEqual(instance.getValue(), 'my value');
 });
 
+QUnit.test(
+  'Assert default value clears on focus, does not return when blur has value.',
+  function(assert) {
+    $('#qunit-fixture').html(markupFormWithThreeInputs);
+    var $input = $('[name=do]');
+    $input.loftLabels();
+    assert.strictEqual($input.val(), 'do');
+    assert.strictEqual($input.focus().val(), '');
+    assert.strictEqual(
+      $input
+        .val('waffle')
+        .blur()
+        .val(),
+      'waffle'
+    );
+  }
+);
 
-QUnit.test('Assert default value clears on focus, does not return when blur has value.', function(assert) {
-  $('#qunit-fixture').html(markupFormWithThreeInputs);
-  var $input = $('[name=do]');
-  $input.loftLabels();
-  assert.strictEqual($input.val(), 'do');
-  assert.strictEqual($input.focus().val(), '');
-  assert.strictEqual($input.val('waffle').blur().val(), 'waffle');
-});
+QUnit.test(
+  'Assert default value clears on focus, returns on blur when empty',
+  function(assert) {
+    $('#qunit-fixture').html(markupFormWithThreeInputs);
+    var $input = $('[name=do]');
+    $input.loftLabels();
+    assert.strictEqual($input.val(), 'do');
+    assert.strictEqual($input.focus().val(), '');
+    assert.strictEqual($input.blur().val(), 'do');
+  }
+);
 
-QUnit.test('Assert default value clears on focus, returns on blur when empty', function(assert) {
-  $('#qunit-fixture').html(markupFormWithThreeInputs);
-  var $input = $('[name=do]');
-  $input.loftLabels();
-  assert.strictEqual($input.val(), 'do');
-  assert.strictEqual($input.focus().val(), '');
-  assert.strictEqual($input.blur().val(), 'do');
-});
-
-QUnit.test('Assert onNotValid receives correct arguments on blur', function(assert) {
+QUnit.test('Assert onNotValid receives correct arguments on blur', function(
+  assert
+) {
   $('#qunit-fixture').html(markupExample2);
   var $form = $('#testcase'),
     $textarea = $form.find('textarea'),
     onNotValidCalled = assert.async(1);
-  $textarea
-    .loftLabels({
-      validation: true,
-      onNotValid: function(value, event) {
-        if (event.type === 'init') return;
-        assert.strictEqual(this.$el.filter('#comment').length, 1);
-        assert.strictEqual(value, 'Share your thoughts...');
-        assert.strictEqual(event.type, 'blur');
-        onNotValidCalled();
-      }
-    });
-  $textarea
-    .blur();
+  $textarea.loftLabels({
+    validation: true,
+    onNotValid: function(value, event) {
+      if (event.type === 'init') return;
+      assert.strictEqual(this.$el.filter('#comment').length, 1);
+      assert.strictEqual(value, 'Share your thoughts...');
+      assert.strictEqual(event.type, 'blur');
+      onNotValidCalled();
+    },
+  });
+  $textarea.blur();
 });
 
-QUnit.test('Assert onValid receives correct arguments on blur', function(assert) {
+QUnit.test('Assert onValid receives correct arguments on blur', function(
+  assert
+) {
   $('#qunit-fixture').html(markupExample2);
   var $form = $('#testcase'),
     $input = $form.find('input'),
     onValidCalled = assert.async(1);
-  $input
-    .loftLabels({
+  $input.loftLabels({
+    validation: true,
+    onValid: function(value, event) {
+      assert.strictEqual(this.$el.filter('#name').length, 1);
+      assert.strictEqual(value, 'Rabbit Air');
+      assert.strictEqual(event.type, 'blur');
+      onValidCalled();
+    },
+  });
+  $input.val('Rabbit Air').blur();
+});
+
+QUnit.test(
+  'Assert onAllValid fires once for each element when all inputs have a non-default value.',
+  function(assert) {
+    $('#qunit-fixture').html(markupFormWithThreeInputs);
+    var $do = $('[name=do]');
+    var $re = $('[name=re]');
+    var $mi = $('[name=mi]');
+
+    // It should fire once for each element.
+    var isCalled = assert.async(3),
+      isCalledWithDo = assert.async(1),
+      isCalledWithRe = assert.async(1),
+      isCalledWithMi = assert.async(1);
+    $('#testcase input').loftLabels({
       validation: true,
-      onValid: function(value, event) {
-        assert.strictEqual(this.$el.filter('#name').length, 1);
-        assert.strictEqual(value, 'Rabbit Air');
-        assert.strictEqual(event.type, 'blur');
-        onValidCalled();
+      onAllValid: function() {
+        isCalled();
+        this.$el.filter('#do').length && isCalledWithDo();
+        this.$el.filter('#re').length && isCalledWithRe();
+        this.$el.filter('#mi').length && isCalledWithMi();
       },
     });
-  $input
-    .val('Rabbit Air')
-    .blur();
-});
 
-QUnit.test('Assert onAllValid fires once for each element when all inputs have a non-default value.', function(assert) {
-  $('#qunit-fixture').html(markupFormWithThreeInputs);
-  var $do = $('[name=do]');
-  var $re = $('[name=re]');
-  var $mi = $('[name=mi]');
+    // Click around.
+    $do.blur();
+    $re.blur();
+    $mi.blur();
 
-  // It should fire once for each element.
-  var isCalled = assert.async(3),
-    isCalledWithDo = assert.async(1),
-    isCalledWithRe = assert.async(1),
-    isCalledWithMi = assert.async(1);
-  $('#testcase input').loftLabels({
-    validation: true,
-    onAllValid: function() {
-      isCalled();
-      this.$el.filter('#do').length && isCalledWithDo();
-      this.$el.filter('#re').length && isCalledWithRe();
-      this.$el.filter('#mi').length && isCalledWithMi();
-    }
-  });
+    // Give a non-default value to the first.
+    $do.val('dog').blur();
+    assert.strictEqual('dog', $do.val());
 
-  // Click around.
-  $do.blur();
-  $re.blur();
-  $mi.blur();
+    // Click around.
+    $do.blur();
+    $re.blur();
+    $mi.blur();
+    $re.val('rabbit').blur();
+    assert.strictEqual('rabbit', $re.val());
 
-  // Give a non-default value to the first.
-  $do.val('dog').blur();
-  assert.strictEqual('dog', $do.val());
+    $do.blur();
+    $re.blur();
+    $mi.blur();
 
-  // Click around.
-  $do.blur();
-  $re.blur();
-  $mi.blur();
-  $re.val('rabbit').blur();
-  assert.strictEqual('rabbit', $re.val());
+    $mi.val('mouse').blur();
+    assert.strictEqual('mouse', $mi.val());
+  }
+);
 
-  $do.blur();
-  $re.blur();
-  $mi.blur();
+QUnit.test(
+  'Assert labels are found by id when no siblings are present',
+  function(assert) {
+    $('#qunit-fixture').html(markupFormWithThreeInputs);
+    var $do = $('[name=do]');
+    var $re = $('[name=re]');
+    var $mi = $('[name=mi]');
 
-  $mi.val('mouse').blur();
-  assert.strictEqual('mouse', $mi.val());
-});
-
-QUnit.test('Assert labels are found by id when no siblings are present', function(assert) {
-  $('#qunit-fixture').html(markupFormWithThreeInputs);
-  var $do = $('[name=do]');
-  var $re = $('[name=re]');
-  var $mi = $('[name=mi]');
-
-  $('#testcase input').loftLabels();
-  assert.strictEqual('do', $do.val());
-  assert.strictEqual('re', $re.val());
-  assert.strictEqual('mi', $mi.val());
-});
+    $('#testcase input').loftLabels();
+    assert.strictEqual('do', $do.val());
+    assert.strictEqual('re', $re.val());
+    assert.strictEqual('mi', $mi.val());
+  }
+);
 
 QUnit.test('Is processed class is applied.', function(assert) {
   $('#qunit-fixture').html(markupWithoutLabel);
@@ -376,23 +421,25 @@ QUnit.test('Is processed class is applied.', function(assert) {
   assert.ok($el.loftLabels().hasClass('loft-labels-processed'));
 });
 
-QUnit.test('Assert labelSelector works to locate the label and hides the alternate label and sets the value of input.', function(assert) {
-  $('#qunit-fixture').html(markupWithoutLabel);
-  var $el = $('#first_name');
-  labelSelectorIsCalled = assert.async();
-  $el.loftLabels({
-    labelSelector: function($el) {
-      assert.strictEqual(this.$el.attr('id'), 'first_name');
-      assert.strictEqual($el.attr('id'), 'first_name');
-      labelSelectorIsCalled();
-      var $label = $('.is-label');
-      return $label;
-    }
-  });
-  assert.strictEqual($el.val(), 'First name');
-  assert.ok($('.is-label').is(':hidden'));
-});
-
+QUnit.test(
+  'Assert labelSelector works to locate the label and hides the alternate label and sets the value of input.',
+  function(assert) {
+    $('#qunit-fixture').html(markupWithoutLabel);
+    var $el = $('#first_name');
+    labelSelectorIsCalled = assert.async();
+    $el.loftLabels({
+      labelSelector: function($el) {
+        assert.strictEqual(this.$el.attr('id'), 'first_name');
+        assert.strictEqual($el.attr('id'), 'first_name');
+        labelSelectorIsCalled();
+        var $label = $('.is-label');
+        return $label;
+      },
+    });
+    assert.strictEqual($el.val(), 'First name');
+    assert.ok($('.is-label').is(':hidden'));
+  }
+);
 
 QUnit.test('Test instance.defaultText for textarea.', function(assert) {
   $('#qunit-fixture').append(markup);
@@ -412,7 +459,7 @@ QUnit.test('Test instance.defaultText for textfield.', function(assert) {
   );
 });
 QUnit.test(
-  'Test the instance is available at the $el.data(\'loftLabels\')',
+  "Test the instance is available at the $el.data('loftLabels')",
   function(assert) {
     $('#qunit-fixture').append(markup);
     var $el = $('#testcase input');
@@ -561,7 +608,9 @@ QUnit.test('Assert LoftLabel instance attaches to element.', function(assert) {
   assert.strictEqual(instance.defaultText, 'Type to search...');
 });
 
-QUnit.test('Assert LoftLabel instance attaches to multiple elements.', function(assert) {
+QUnit.test('Assert LoftLabel instance attaches to multiple elements.', function(
+  assert
+) {
   $('#qunit-fixture').html(markupExample2);
   var $form = $('#testcase'),
     $input = $form.find('input');
@@ -575,7 +624,8 @@ QUnit.test('Able to detect version.', function(assert) {
   assert.ok($.fn.loftLabels.version, 'Version is not empty.');
 });
 
-var markup = '<form id="testcase">\n' +
+var markup =
+  '<form id="testcase">\n' +
   '    <div class="element">\n' +
   '      <label for="search">Type to search...</label>\n' +
   '      <input type="text" id="search" name="search" value=""/>\n' +
@@ -586,10 +636,12 @@ var markup = '<form id="testcase">\n' +
   '  </form>\n' +
   '  <input type="text" id="tags" name="tags" value=""/>';
 
-var markupWithoutLabel = '<span class="is-label">First name</span>\n' +
+var markupWithoutLabel =
+  '<span class="is-label">First name</span>\n' +
   '<input type="text" id="first_name" name="first_name" value=""/>';
 
-var markupFormWithThreeInputs = '<form id="testcase">\n' +
+var markupFormWithThreeInputs =
+  '<form id="testcase">\n' +
   '  <div><label for="do">do</label>\n' +
   '  <label for="re">re</label>\n' +
   '  <label for="mi">mi</label></div>\n' +
@@ -598,7 +650,8 @@ var markupFormWithThreeInputs = '<form id="testcase">\n' +
   '  <input value="" name="mi" id="mi" type="text"/>\n' +
   '</form>';
 
-var markupExample2 = '<form id="testcase">\n' +
+var markupExample2 =
+  '<form id="testcase">\n' +
   '      <div class="form-group">\n' +
   '        <label for="search2">Your name</label>\n' +
   '        <input type="text" id="name" name="name" value="" class="form-control"/>\n' +
@@ -612,7 +665,8 @@ var markupExample2 = '<form id="testcase">\n' +
   '      <button>Submit</button>\n' +
   '    </form>';
 
-var markupScopeForm = '<form id="testcase">\n' +
+var markupScopeForm =
+  '<form id="testcase">\n' +
   '    <div class="form-group">\n' +
   '      <label for="name">Full name</label>\n' +
   '      <input type="text" id="name" name="name" value="" class="form-control"/>\n' +
@@ -628,7 +682,8 @@ var markupScopeForm = '<form id="testcase">\n' +
   '    <button>Register</button>\n' +
   '  </form>';
 
-var markupResponsive = '<label for="responsive-demo" data-label-medium="Medium label" data-label-large="Large label">Small label</label>\n' +
+var markupResponsive =
+  '<label for="responsive-demo" data-label-medium="Medium label" data-label-large="Large label">Small label</label>\n' +
   '    <input type="text" name="responsive_demo" id="responsive-demo"/>';
 
 function assertInstance(assert, instance) {
