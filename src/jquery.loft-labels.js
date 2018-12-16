@@ -359,7 +359,6 @@
     if (typeof s.onInit === 'function') {
       s.onInit(this);
     }
-    console.log(this);
     return this;
   }
 
