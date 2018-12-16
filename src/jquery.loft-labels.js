@@ -62,6 +62,7 @@
           $el: $el,
           $validation: $members,
           defaultText: null,
+          label: null,
           settings: settings,
           segment: {},
           hasDefaultText: true,
@@ -97,30 +98,21 @@
            * @returns {null}
            */
           getLabel: function() {
-            var placeholder = this.defaultText;
+            this.label = this.defaultText;
             if (this.segment) {
-              var name = 'data-' + this.settings.dataPrefix + this.segment.name,
-                placeholder = this.$label.attr(name) || placeholder;
+              var name = 'data-' + this.settings.dataPrefix + this.segment.name;
+              this.label = this.$label.attr(name) || this.label;
             }
             if (typeof this.settings.onGetLabel === 'function') {
-              placeholder = this.settings.onGetLabel.call(this, placeholder);
+              this.label = this.settings.onGetLabel.call(this, this.label);
             }
 
-            return placeholder;
-          },
-
-          /**
-           * Determine if the current value is the default value.
-           * @returns {boolean}
-           */
-          isDefault: function() {
-            return this.getValue() === this.defaultText;
-          },
+            return this.label;
+          }
         };
 
         $el.data(pluginName, instance);
         initializeInstance.call(instance);
-        // detectDefaultState(instance);
 
         // Handlers
         $el
@@ -324,7 +316,9 @@
   };
 
   function detectDefaultState(instance) {
-    instance.hasDefaultText = instance.isDefault() || !instance.getValue();
+    var value = instance.getValue();
+    console.log(value, instance.label);
+    instance.hasDefaultText = !value || value === instance.label;
   }
 
   function initializeInstance() {
@@ -343,6 +337,8 @@
 
     // Modify the default text...
     this.defaultText = $.trim(this.defaultText);
+    this.label = $.trim(this.defaultText);
+
 
     // If we have a value in the form, this plugin is moot.
     this.hasDefaultText = false;
@@ -361,7 +357,7 @@
     if (typeof s.onInit === 'function') {
       s.onInit(this);
     }
-
+    console.log(this);
     return this;
   }
 
@@ -383,9 +379,8 @@
       // A member is not a member yet if it's not instantiated, this can be
       // the case on init.
       if (!instance) return;
-      var value = $member.val(),
-        isDefault = instance ? instance.isDefault() : true;
-      if (!value || isDefault) {
+      var value = $member.val();
+      if (!value || value === instance.label) {
         if (typeof settings.onNotValid === 'function') {
           settings.onNotValid.call(instance, value, event);
         }
@@ -396,6 +391,7 @@
         }
       }
     });
+
     if (validCount === $members.length) {
       if (typeof settings.onAllValid === 'function') {
         settings.onAllValid.call(instance, event);
@@ -431,7 +427,7 @@
     } else {
       remove.push(s.focus);
     }
-    if (this.isDefault()) {
+    if (this.getValue() === this.label) {
       add.push(s.default);
     } else {
       remove.push(s.default);

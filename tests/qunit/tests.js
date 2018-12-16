@@ -10,6 +10,123 @@
  * @{
  */
 
+// QUnit.test('Using validation with responsive with default value triggers onNotValid on instantation and not onValid', function(assert) {
+//   $('#qunit-fixture').html(markup);
+//   var $el = $('#testcase input');
+//   var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
+//
+//   // var onNotValidIsCalled = assert.async();
+//   $el.loftLabels({
+//     breakpointX: bpx
+//     segment: bpx.getSegment(1000),
+//     onGetLabel: function(label) {
+//       if (this.segment.name !== 'small') {
+//         return 'Type to search my website';
+//       }
+//       return label;
+//     },
+//     validation: true,
+//     onValid: function(value) {
+//       console.log('onValid');
+//       assert.ok(value);
+//     },
+//     onNotValid: function(value) {
+//       console.log('onNotValid');
+//       assert.ok(value);
+//       // onNotValidIsCalled();
+//       assert.ok(true);
+//     }
+//   });
+// });
+// QUnit.test('Using validation default value triggers onNotValid on instantation', function(assert) {
+//   $('#qunit-fixture').html(markup);
+//   var $el = $('#testcase input');
+//
+//   var onNotValidIsCalled = assert.async();
+//   $el.loftLabels({
+//     onGetLabel: function(label) {
+//       if (this.segment.name !== 'small') {
+//         return 'Type to search my website';
+//       }
+//       return label;
+//     },
+//     validation: true,
+//     onValid: function(value) {
+//       console.log('onValid');
+//     },
+//     onNotValid: function(value) {
+//       console.log('onNotValid');
+//       assert.ok(value);
+//       onNotValidIsCalled();
+//     }
+//   });
+// });
+
+QUnit.test('Test instance.clear/unclear for textarea.', function(assert) {
+  $('#qunit-fixture').append(markup);
+  var $el = $('#testcase textarea'),
+    defaultText = 'Share your thoughts...';
+  $el.loftLabels();
+  var instance = $el.data('loftLabels');
+
+  $el.focus();
+  assert.strictEqual('', instance.$el.val());
+
+  $el.blur();
+  assert.strictEqual(defaultText, instance.$el.val());
+
+  instance.setValue('not default');
+
+  // Does not clear if the value is not the default.
+  $el.focus();
+  assert.strictEqual('not default', instance.$el.val());
+
+  $el.blur();
+  assert.strictEqual('not default', instance.$el.val());
+
+  // Goes back to default regardless of the value,.
+  instance.setValue(instance.getLabel());
+  assert.strictEqual(defaultText, instance.$el.val());
+});
+
+QUnit.test('Assert onAllValid fires when validation is a jQuery object of lesser scope on keyup.', function(assert) {
+  $('#qunit-fixture').html(markupScopeForm);
+  var $form = $('#testcase');
+  var onValidCalled = assert.async(1);
+  $form.find('input').loftLabels({
+    validation: $form.find('input:not(#phone)'),
+    onAllValid: function(event) {
+      assert.ok(event.type);
+      onValidCalled();
+    }
+  });
+  $('#name, #email').val('lorem');
+  $('#name').keyup();
+});
+
+
+QUnit.test('Assert onAllValid receives correct arguments on blur', function(assert) {
+  $('#qunit-fixture').html(markupExample2);
+  var $form = $('#testcase'),
+    $input = $form.find('input'),
+    $textarea = $form.find('textarea');
+  var onAllValid = assert.async(1);
+  $textarea.add($input)
+    .loftLabels({
+      validation: true,
+      onAllValid: function(event) {
+        assert.strictEqual(event.type, 'blur');
+        assert.ok(this.$el.filter('#comment').length === 1);
+        assert.ok(this.$validation.length === 2);
+        onAllValid();
+      }
+    });
+  $textarea
+    .add($input)
+    .val('lorem');
+  $textarea.blur();
+});
+
 QUnit.test('onGetLabel is fired for each breakpoint cross and has .segment',
   function(assert) {
     $('#qunit-fixture').html(markup);
@@ -154,43 +271,6 @@ QUnit.test('Assert default value clears on focus, returns on blur when empty', f
   assert.strictEqual($input.val(), 'do');
   assert.strictEqual($input.focus().val(), '');
   assert.strictEqual($input.blur().val(), 'do');
-});
-
-QUnit.test('Assert onAllValid fires when validation is a jQuery object of lesser scope on keyup.', function(assert) {
-  $('#qunit-fixture').html(markupScopeForm);
-  var $form = $('#testcase');
-  var onValidCalled = assert.async(1);
-  $form.find('input').loftLabels({
-    validation: $form.find('input:not(#phone)'),
-    onAllValid: function(event) {
-      assert.ok(event.type);
-      onValidCalled();
-    }
-  });
-  $('#name, #email').val('lorem');
-  $('#name').keyup();
-});
-
-QUnit.test('Assert onAllValid receives correct arguments on blur', function(assert) {
-  $('#qunit-fixture').html(markupExample2);
-  var $form = $('#testcase'),
-    $input = $form.find('input'),
-    $textarea = $form.find('textarea');
-  var onAllValid = assert.async(1);
-  $textarea.add($input)
-    .loftLabels({
-      validation: true,
-      onAllValid: function(event) {
-        assert.strictEqual(event.type, 'blur');
-        assert.ok(this.$el.filter('#comment').length === 1);
-        assert.ok(this.$validation.length === 2);
-        onAllValid();
-      }
-    });
-  $textarea
-    .add($input)
-    .val('lorem');
-  $textarea.blur();
 });
 
 QUnit.test('Assert onNotValid receives correct arguments on blur', function(assert) {
@@ -371,32 +451,6 @@ QUnit.test('Test the is-default class is applied/removed.', function(assert) {
   assert.ok($el.hasClass('loft-labels-is-default'));
 });
 
-QUnit.test('Test instance.clear/unclear for textarea.', function(assert) {
-  $('#qunit-fixture').append(markup);
-  var $el = $('#testcase textarea'),
-    defaultText = 'Share your thoughts...';
-  $el.loftLabels();
-  var instance = $el.data('loftLabels');
-
-  $el.focus();
-  assert.strictEqual('', instance.$el.val());
-
-  $el.blur();
-  assert.strictEqual(defaultText, instance.$el.val());
-
-  instance.setValue('not default');
-
-  // Does not clear if the value is not the default.
-  $el.focus();
-  assert.strictEqual('not default', instance.$el.val());
-
-  $el.blur();
-  assert.strictEqual('not default', instance.$el.val());
-
-  // Goes back to default regardless of the value,.
-  instance.setValue(instance.getLabel());
-  assert.strictEqual(defaultText, instance.$el.val());
-});
 QUnit.test('Test instance.clear/unclear for textfield.', function(assert) {
   $('#qunit-fixture').append(markup);
   var $el = $('#testcase input'),
