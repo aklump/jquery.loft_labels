@@ -3,9 +3,9 @@
 
 
 "@aklump/breakpointx@^0.7.1":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/@aklump/breakpointx/-/breakpointx-0.7.1.tgz#67001ba7bf941919974a883bfbde632e433ecb69"
-  integrity sha512-UeQlsTZOC24U5eJQaDrxP9U6GEnYJHgE+mnVu6Bd14qvsjt+AdaDYyPkVqz6D1HXufjUUWK29a8m7TQRbZz2xQ==
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/@aklump/breakpointx/-/breakpointx-0.7.2.tgz#4acaf83f78cec389de927c3181bf7a5f15fe158b"
+  integrity sha512-D+QplMBSS6rJ+43ty2HsoSKuBV6ufxsxbKQ+N+g3B96VFDuWqzK5ON7c+TDCib6sZ/A9B84FlRkbZe6MnIT/dA==
 
 bootstrap@^4.1.3:
   version "4.1.3"
