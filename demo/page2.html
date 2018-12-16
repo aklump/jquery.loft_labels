@@ -21,9 +21,11 @@
   <hr/>
 
   <div class="my-4">
-    <h2>Responsive Labels</h2>
+    <h2>Demo 1: Using HTML Attributes</h2>
 
-    <p>This page contains two breakpoints as shown. There are three label options.  The label changes as the width of the browser does so.  This is achieved by using data attributes following this pattern <code>data-label-{segment name}="{segment label}"</code>.  If you omit a value for one or more segments, the fallback is the innerHTML of the label.</p>
+    <p>This page contains two breakpoints as shown. There are three label options. The label changes as the width of the browser does so. This is achieved by using data attributes following this pattern
+      <code>data-label-{segment name}="{segment label}"</code>. If you omit a value for one or more segments, the fallback is the innerHTML of the label.
+    </p>
 
     <p><img src="images/breakpoints.png" alt="An image showing two breakpoints">
     </p>
@@ -49,6 +51,39 @@ $('input').loftLabels({
   </div>
 
   <hr/>
+  <div class="my-4">
+    <h2>Demo 2: Using JS and `onGetLabel`</h2>
+
+    <p>In some cases it may be more appropriate to provide responsive labels using Javascript. You can leverage
+      <code>this.segment</code> to craft your label response in
+      <code>onGetLabel()</code>.  <code>this.segment</code> is only available if you use Breakpoint X.</p>
+
+    <label for="responsive-demo2">Default label</label>
+    <input type="text" name="responsive_demo2" id="responsive-demo2"/>
+
+    <div class="my-4">
+      <h3>HTML</h3>
+      <pre>
+&lt;label for="responsive-demo2">Default label&lt;/label>
+&lt;input type="text" name="responsive_demo2" id="responsive-demo2"/>
+    </pre>
+
+      <h3>Javascript</h3>
+      <pre>
+$('#responsive-demo2').loftLabels({
+  breakpointX: new BreakpointX([480, 768], ['small', 'medium', 'large']),
+  onGetLabel: function(label) {
+    var name = this.segment.name;
+    if (name === 'large') {
+      return 'Large label';
+    }
+    return name === 'small' ? 'Small label' : 'Medium label';
+  },
+});
+      </pre>
+    </div>
+  </div>
+  <hr/>
   <p class="text-muted"><strong>__title</strong> is brought to you by
     <a href="http://www.intheloftstudios.com">In the Loft Studios</a></p>
 </div>
@@ -58,10 +93,19 @@ $('input').loftLabels({
 <script>
   (function($) {
     $('document').ready(function() {
-      var i = $('input').loftLabels({
+      $('#responsive-demo').loftLabels({
         breakpointX: new BreakpointX([480, 768], ['small', 'medium', 'large']),
       });
-      console.log(i.data('loftLabels'));
+      $('#responsive-demo2').loftLabels({
+        breakpointX: new BreakpointX([480, 768], ['small', 'medium', 'large']),
+        onGetLabel: function(label) {
+          var name = this.segment.name;
+          if (name === 'large') {
+            return 'Large label';
+          }
+          return name === 'small' ? 'Small label' : 'Medium label';
+        },
+      });
     });
   })(jQuery);
 </script>

@@ -63,7 +63,8 @@
           $validation: $members,
           defaultText: null,
           settings: settings,
-          hasPlaceholderText: null,
+          segment: {},
+          hasDefaultText: true,
           states: [],
 
           /**
@@ -101,6 +102,10 @@
               var name = 'data-' + this.settings.dataPrefix + this.segment.name,
                 placeholder = this.$label.attr(name) || placeholder;
             }
+            if (typeof this.settings.onGetLabel === 'function') {
+              placeholder = this.settings.onGetLabel.call(this, placeholder);
+            }
+
             return placeholder;
           },
 
@@ -115,14 +120,14 @@
 
         $el.data(pluginName, instance);
         initializeInstance.call(instance);
-        detectDefaultState(instance);
+        // detectDefaultState(instance);
 
         // Handlers
         $el
           .bind('focus', function() {
-            instance.hasPlaceholderText || detectDefaultState(instance);
+            instance.hasDefaultText || detectDefaultState(instance);
             instance.states.focus = true;
-            if (instance.hasPlaceholderText) {
+            if (instance.hasDefaultText) {
               $el.val('');
               renderHtml.call(instance);
             }
@@ -164,8 +169,7 @@
             instance.segment = segment;
             refreshInstance(instance);
           });
-        })
-        .triggerActions();
+        });
     }
 
     return this;
@@ -206,16 +210,23 @@
     breakpointX: null,
 
     /**
+     * Preset the default segement instead of using window.width.
+     *
+     * By default the segment at instantiation is based on the window width.
+     * You may pass a segment here to use instead.  This may only be necessary
+     * for unti testing.
+     */
+    segment: null,
+
+    /**
      * Modify the label string.
      *
-     * Use this to alter the label string before it's placed into the
-     * textfield. The instance is available as 'this'.  This happens once
-     * during the init phase.
+     * Use this to alter the label string before getLabel().
      *
      * @param defaultText
      * @returns {*}
      */
-    callback: null,
+    onGetLabel: null,
 
     /**
      * A function to call after init has completed.
@@ -314,7 +325,7 @@
   };
 
   function detectDefaultState(instance) {
-    instance.hasPlaceholderText = instance.isDefault() || !instance.getValue();
+    instance.hasDefaultText = instance.isDefault() || !instance.getValue();
   }
 
   function initializeInstance() {
@@ -333,25 +344,24 @@
 
     // Modify the default text...
     this.defaultText = $.trim(this.defaultText);
-    this.defaultText = s.callback
-      ? s.callback.call(this, this.defaultText)
-      : this.defaultText;
 
     // If we have a value in the form, this plugin is moot.
-    if (this.getValue()) {
-      this.$el.addClass(s.focus);
-      return $(this);
-    } else {
-      this.setValue(this.getLabel());
+    this.hasDefaultText = false;
+    if (!this.getValue()) {
+      this.hasDefaultText = true;
+      if (s.breakpointX) {
+        this.segment = s.segment || s.breakpointX.getSegmentByWindow();
+      }
+      // Due to complex reasons; do not use setValue() here! 2018-12-15T13:27,
+      // aklump
+      this.$el.val(this.getLabel());
       this.$el.removeClass(s.focus);
     }
-
     renderHtml.call(this);
     validationHandler(this, { type: 'init' }, this.$validation);
     if (typeof s.onInit === 'function') {
       s.onInit(this);
     }
-    detectDefaultState(this);
 
     return this;
   }
@@ -398,7 +408,7 @@
    * If displaying default text, make sure it's correct.
    */
   function refreshInstance(instance) {
-    if (instance.hasPlaceholderText) {
+    if (instance.hasDefaultText) {
       instance.$el.val(instance.getLabel());
       renderHtml.call(instance);
       return this;

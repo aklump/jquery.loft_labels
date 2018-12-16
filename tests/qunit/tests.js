@@ -2,19 +2,99 @@
  * @file
  * Tests provided against the LoftLabels class.
  *
+ * To use a different segment than the actual window width during the
+ *   instantiation, you need to pass the necessary segment as an option.  See
+ *   examples in tests.
+ *
  * @ingroup loft_labels
  * @{
  */
+
+QUnit.test('onGetLabel is fired for each breakpoint cross and has .segment',
+  function(assert) {
+    $('#qunit-fixture').html(markup);
+    var isCalledSmall = assert.async();
+    var isCalledMedium = assert.async();
+
+    // TODO It's possible this will need to be set to 1, if a bug in
+    // BreakpointX gets resolved.  Watch for future test failure.
+    // 2018-12-16T09:02, aklump
+    var isCalledLarge = assert.async(2);
+    var $el = $('#testcase input');
+    var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
+    $el.loftLabels({
+      segment: bpx.getSegment(300),
+      onGetLabel: function(label) {
+        assert.ok(label);
+        assert.ok(this.segment.name);
+        this.segment.name === 'small' && isCalledSmall();
+        this.segment.name === 'medium' && isCalledMedium();
+        this.segment.name === 'large' && isCalledLarge();
+      }, breakpointX: bpx,
+    }).data('loftLabels');
+    bpx
+      .onWindowResize(500)
+      .onWindowResize(900);
+  });
+
+QUnit.test('Test the onGetLabel callback is called for .getLabel().', function(assert) {
+  $('#qunit-fixture').append(markup);
+  var $el = $('#testcase input');
+  var received = assert.async(2);
+  var instance = $el.loftLabels({
+    onGetLabel: function(label) {
+      assert.strictEqual('Type to search...', label);
+      received();
+
+      return 'Search';
+    },
+  }).data('loftLabels');
+  assert.strictEqual(instance.getLabel(), 'Search');
+});
+
+QUnit.test('Test the correct label value is set on instantiation when onGetLabel is used.', function(assert) {
+  $('#qunit-fixture').append(markup);
+  var $el = $('#testcase input');
+  $el.loftLabels({
+    onGetLabel: function(label) {
+      assert.strictEqual('Type to search...', label);
+      return 'Search';
+    },
+  }).data('loftLabels');
+  assert.strictEqual($el.val(), 'Search');
+});
+
+
+QUnit.test('Default Label changes for each breakpoint', function(assert) {
+  $('#qunit-fixture').html(markupResponsive);
+  var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
+  var instance = $('#responsive-demo').loftLabels({
+    segment: bpx.getSegment(300),
+    breakpointX: bpx,
+  }).data('loftLabels');
+
+  assert.strictEqual(instance.$el.val(), 'Small label');
+  assert.strictEqual(instance.getValue(), 'Small label');
+  bpx.onWindowResize(500);
+  assert.strictEqual(instance.$el.val(), 'Medium label');
+  assert.strictEqual(instance.getValue(), 'Medium label');
+  bpx.onWindowResize(1000);
+  assert.strictEqual(instance.$el.val(), 'Large label');
+  assert.strictEqual(instance.getValue(), 'Large label');
+});
 
 QUnit.test('Label with value is not affected by change of segment',
   function(assert) {
     $('#qunit-fixture').html(markupResponsive);
     var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
     var instance = $('#responsive-demo')
-      .loftLabels({ breakpointX: bpx })
+      .loftLabels({
+        segment: bpx.getSegment(300),
+        breakpointX: bpx
+      })
       .data('loftLabels');
     instance.setValue('Sunrise');
-    bpx.triggerActions(300);
+
     assert.strictEqual(instance.getValue(), 'Sunrise');
     assert.strictEqual(instance.getLabel(), 'Small label');
 
@@ -57,19 +137,6 @@ QUnit.test('GetValue works as expected and trims whitespace', function(assert) {
   assert.strictEqual(instance.getValue(), 'my value');
 });
 
-QUnit.test('Default Label changes for each breakpoint', function(assert) {
-  $('#qunit-fixture').html(markupResponsive);
-  var bpx = new BreakpointX([480, 768], ['small', 'medium', 'large']);
-  var instance = $('#responsive-demo').loftLabels({
-    breakpointX: bpx,
-  }).data('loftLabels');
-  bpx.triggerActions(300);
-  assert.strictEqual(instance.getValue(), 'Small label');
-  bpx.onWindowResize(500);
-  assert.strictEqual(instance.getValue(), 'Medium label');
-  bpx.onWindowResize(1000);
-  assert.strictEqual(instance.getValue(), 'Large label');
-});
 
 QUnit.test('Assert default value clears on focus, does not return when blur has value.', function(assert) {
   $('#qunit-fixture').html(markupFormWithThreeInputs);
@@ -376,26 +443,6 @@ QUnit.test('Check custom classes on focus, blur and hover.', function(assert) {
 
   $el.trigger('mouseleave');
   assert.strictEqual(false, $el.hasClass('over'));
-});
-
-QUnit.test('Test the default value callback.', function(assert) {
-  $('#qunit-fixture').append(markup);
-  var $el = $('#testcase input');
-  var received = assert.async();
-  var complete = assert.async();
-
-  $el.loftLabels({
-    callback: function(defaultText) {
-      assert.strictEqual('Type to search...', defaultText);
-      received();
-
-      return 'Breakfast time!';
-    },
-  });
-  setTimeout(function() {
-    assert.strictEqual('Breakfast time!', $el.val());
-    complete();
-  }, 10);
 });
 
 QUnit.test('Test the onInit callback.', function(assert) {
