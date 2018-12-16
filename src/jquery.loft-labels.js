@@ -321,7 +321,6 @@
 
   function detectDefaultState(instance) {
     var value = instance.getValue();
-    console.log(value, instance.label);
     instance.hasDefaultText = !value || value === instance.label;
   }
 

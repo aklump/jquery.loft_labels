@@ -32,7 +32,6 @@ QUnit.test(
         onValidCalledCount++;
       },
       onNotValid: function(value) {
-        console.log('onNotValid');
         assert.ok(value);
         onNotValidIsCalled();
         assert.ok(true);
