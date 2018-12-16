@@ -161,15 +161,14 @@
       });
 
     if (this.settings.breakpointX) {
-      this.settings.breakpointX
-        .addCrossAction(function(segment) {
-          // Read in the segment label for all elements.
-          $elements.each(function() {
-            var instance = $(this).data('loftLabels');
-            instance.segment = segment;
-            refreshInstance(instance);
-          });
+      this.settings.breakpointX.addCrossAction(function(segment) {
+        // Read in the segment label for all elements.
+        $elements.each(function() {
+          var instance = $(this).data('loftLabels');
+          instance.segment = segment;
+          refreshInstance(instance);
         });
+      });
     }
 
     return this;
