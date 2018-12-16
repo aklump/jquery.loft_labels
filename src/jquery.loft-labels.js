@@ -61,6 +61,7 @@
         var instance = {
           $el: $el,
           $validation: $members,
+          // This is the fallback label.
           defaultText: null,
           label: null,
           settings: settings,
@@ -108,7 +109,7 @@
             }
 
             return this.label;
-          }
+          },
         };
 
         $el.data(pluginName, instance);
@@ -214,8 +215,11 @@
      *
      * Use this to alter the label string before getLabel().
      *
-     * @param defaultText
+     * @param {string} label
+     *   The label as it's been figured.
+     *
      * @returns {*}
+     *   The (altered) label to use.
      */
     onGetLabel: null,
 
@@ -339,7 +343,6 @@
     this.defaultText = $.trim(this.defaultText);
     this.label = $.trim(this.defaultText);
 
-
     // If we have a value in the form, this plugin is moot.
     this.hasDefaultText = false;
     if (!this.getValue()) {
@@ -367,9 +370,7 @@
    */
   var validationHandler = function(instance, event, $members) {
     var settings = instance.settings;
-    if (!settings.validation) {
-      return;
-    }
+    if (!settings.validation) return;
     var validCount = 0;
 
     // Cycle through all members to be validated.
@@ -391,7 +392,6 @@
         }
       }
     });
-
     if (validCount === $members.length) {
       if (typeof settings.onAllValid === 'function') {
         settings.onAllValid.call(instance, event);

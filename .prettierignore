@@ -8,6 +8,5 @@ images
 /includes
 /modules
 node_modules
-tests
 vendor
 bower_components
