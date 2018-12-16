@@ -1,6 +1,8 @@
 # Changelog
 
 ## 1.0
+* Major change of instanct properties.
+* `settings.callback` became `settings.onGetLabel` and now fires every time, not just instantiation.
 * Changed the function arguments to `onNotValid`, removed `$member` and `isDefault`. 
 * Added label location matching `for` to `id`.  The initial search is now for a label having a `for` attribute that matches the id of the input.  The old way is used as a fallback if the first is not found.  If this breaks you should use this as your instantion setting, which is the old function.
 

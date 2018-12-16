@@ -25,6 +25,8 @@
 <h2>1.0</h2>
 
 <ul>
+<li>Major change of instanct properties.</li>
+<li><code>settings.callback</code> became <code>settings.onGetLabel</code> and now fires every time, not just instantiation.</li>
 <li>Changed the function arguments to <code>onNotValid</code>, removed <code>$member</code> and <code>isDefault</code>.</li>
 <li><p>Added label location matching <code>for</code> to <code>id</code>.  The initial search is now for a label having a <code>for</code> attribute that matches the id of the input.  The old way is used as a fallback if the first is not found.  If this breaks you should use this as your instantion setting, which is the old function.</p>
 
@@ -69,7 +71,7 @@ var instance = instances[0];
 </div>
   
   <div id="footer-legaleeze">
-    <p class="legaleeze center">Version: 1.1.0 &bull; Last Updated: Sat, 15 Dec 2018 08:37:32 -0800</p>
+    <p class="legaleeze center">Version: 1.1.1 &bull; Last Updated: Sun, 16 Dec 2018 09:03:58 -0800</p>
   </div>
 </footer>
 
